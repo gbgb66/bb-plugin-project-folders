@@ -2,7 +2,7 @@ import { t } from "./i18n";
 import { getThreadIndicator, type ThreadIndicatorInput } from "./thread-status";
 
 const colors = {
-  running: "bg-orange-600",
+  running: "pf-status-running text-yellow-600",
   ready: "bg-green-600",
   error: "bg-red-600",
   idle: "bg-muted-foreground/40",

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.39 — Yellow working spinner
+
+- Replace the orange working/waiting dot with a yellow rotating ring. Ready answers and errors remain green and red dots.
+- Stop the animation on completion or failure and respect the operating system’s reduced-motion setting.
+
 ## 0.6.38 — Colored thread indicators (gbgb66 fork)
 
 - Add an orange working/waiting dot, a green answer-ready dot and a red error dot beside every chat, with translated tooltips and accessible labels. New chats without a result remain neutral; reading a completed chat keeps it green.

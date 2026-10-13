@@ -2,7 +2,7 @@
 
 Projects & Sections is a BB plugin that organizes project chats into sections backed by folders on connected devices. It also provides per-place rules and chat defaults, archives, history exports, appearance controls, optional session-context filtering and opt-in prompt-cache keepalive for pinned Claude chats.
 
-This fork adds a status dot beside every chat: **orange** while working or waiting, **green** when an answer is ready, and **red** on an execution or queued-send error. A chat with no result yet stays neutral. Hover the dot for the status; opening or reading a finished chat keeps it green.
+This fork adds a status indicator beside every chat: a **spinning yellow ring** while working or waiting, **green** when an answer is ready, and **red** on an execution or queued-send error. A chat with no result yet stays neutral. Hover the indicator for the status; opening or reading a finished chat keeps it green.
 
 ## Install
 

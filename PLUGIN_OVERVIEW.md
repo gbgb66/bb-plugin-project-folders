@@ -4,7 +4,7 @@ A sidebar tree of projects, sections and subsections that are real folders on yo
 
 ## Thread status colors
 
-Every chat has a live status dot: orange for work or waiting, green for a ready answer, and red for execution or queued-send errors. New chats with no result stay neutral. Hover for an explanation; reading a completed chat does not clear its green status. Pending questions and approvals stay orange with a waiting label. The status uses BB's sidebar data and needs no polling or extra service.
+Every chat has a live status indicator: a spinning yellow ring for work or waiting, green for a ready answer, and red for execution or queued-send errors. New chats with no result stay neutral. Hover for an explanation; reading a completed chat does not clear its green status. Pending questions and approvals keep the yellow indicator with a waiting label. The status uses BB's sidebar data and needs no polling or extra service.
 
 ## Rules beside the work
 

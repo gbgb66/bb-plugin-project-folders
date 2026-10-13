@@ -24,15 +24,24 @@ try {
 
   for (const entry of ["app", "server", "host"]) {
     const metadata = JSON.parse(
-      readFileSync(new URL(`../dist/${entry}.meta.json`, import.meta.url), "utf8"),
+      readFileSync(
+        new URL(`../dist/${entry}.meta.json`, import.meta.url),
+        "utf8",
+      ),
     );
     assert.equal(metadata.pluginVersion, manifest.version);
   }
   const css = readFileSync(new URL("../dist/app.css", import.meta.url), "utf8");
-  for (const color of ["orange", "green", "red"]) {
+  for (const color of ["green", "red"]) {
     assert.ok(css.includes(`.bg-${color}-600`));
   }
-  console.log("Build verified: colored dots, version metadata and a lossless backup round-trip.");
+  assert.ok(css.includes(".text-yellow-600"));
+  assert.ok(css.includes(".pf-status-running"));
+  assert.ok(css.includes("@keyframes pf-status-spin"));
+  assert.ok(css.includes("prefers-reduced-motion"));
+  console.log(
+    "Build verified: colored dots, version metadata and a lossless backup round-trip.",
+  );
 } finally {
   await host.harness.lifecycle.dispose();
 }

@@ -48,7 +48,7 @@ describe("thread status indicator", () => {
     "planMode",
     "goals",
   ] as const)(
-    "keeps %s work orange after the main turn is idle",
+    "keeps %s work in the running state after the main turn is idle",
     (activity) => {
       expect(
         getThreadIndicator({

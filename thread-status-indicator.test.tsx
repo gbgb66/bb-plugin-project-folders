@@ -31,7 +31,12 @@ it("updates the visible color and accessible label as a turn finishes, is read, 
   expect(
     view
       .getByRole("img", { name: "Working" })
-      .classList.contains("bg-orange-600"),
+      .classList.contains("text-yellow-600"),
+  ).toBe(true);
+  expect(
+    view
+      .getByRole("img", { name: "Working" })
+      .classList.contains("pf-status-running"),
   ).toBe(true);
 
   const completed: ThreadIndicatorInput = {
@@ -47,6 +52,11 @@ it("updates the visible color and accessible label as a turn finishes, is read, 
       .getByRole("img", { name: "Answer ready" })
       .classList.contains("bg-green-600"),
   ).toBe(true);
+  expect(
+    view
+      .getByRole("img", { name: "Answer ready" })
+      .classList.contains("pf-status-running"),
+  ).toBe(false);
 
   view.rerender(
     <ThreadStatusIndicator thread={{ ...completed, indicator: "none" }} />,
@@ -61,6 +71,11 @@ it("updates the visible color and accessible label as a turn finishes, is read, 
   expect(
     view.getByRole("img", { name: "Error" }).classList.contains("bg-red-600"),
   ).toBe(true);
+  expect(
+    view
+      .getByRole("img", { name: "Error" })
+      .classList.contains("pf-status-running"),
+  ).toBe(false);
 
   view.rerender(
     <ThreadStatusIndicator thread={{ ...thread, indicator: "unread-error" }} />,
@@ -77,5 +92,6 @@ it("provides Russian labels and an explanatory tooltip for waiting", () => {
   );
   const dot = view.getByRole("img", { name: "Ожидает вашего ответа" });
   expect(dot.getAttribute("title")).toBe("Ожидает вашего ответа");
-  expect(dot.classList.contains("bg-orange-600")).toBe(true);
+  expect(dot.classList.contains("text-yellow-600")).toBe(true);
+  expect(dot.classList.contains("pf-status-running")).toBe(true);
 });

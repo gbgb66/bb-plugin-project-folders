@@ -127,6 +127,24 @@
   margin-inline: 2px;
   border-radius: 50%;
 }
+.pf-status-running {
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: pf-status-spin 0.8s linear infinite;
+}
+@keyframes pf-status-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pf-status-running {
+    animation: none;
+  }
+}
 .pf-unread {
   font-weight: 650;
 }

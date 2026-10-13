@@ -125,7 +125,7 @@ it("renders a colored indicator for every root and section chat, including while
   );
   const title = await view.findByText("Ready chat");
   for (const [name, label, color] of [
-    ["Working chat", "Working", "bg-orange-600"],
+    ["Working chat", "Working", "text-yellow-600"],
     ["Ready chat", "Answer ready", "bg-green-600"],
     ["Failed chat", "Error", "bg-red-600"],
   ]) {
