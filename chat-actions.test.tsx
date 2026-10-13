@@ -84,6 +84,55 @@ function mount(failMove = false) {
     },
   );
 }
+it("archives the selected root or section chat from its title-side button without opening it", async () => {
+  let navigations = 0;
+  const inSection = {
+    ...thread,
+    id: "t2",
+    title: null,
+    titleFallback: "Section chat",
+    environment: { ...thread.environment, id: "e2" },
+  };
+  const view = renderSlot(
+    app.threadLists[0]!,
+    { activeThreadId: null, onNavigate: () => navigations++ },
+    {
+      sidebarThreads: { threads: [thread, inSection], projects: [] },
+      rpc: {
+        list: () => ({
+          folders: [folder],
+          roots: [root],
+          bindings: { e2: "f1" },
+          errors: [],
+        }),
+      },
+    },
+  );
+  await view.findByText("Section chat");
+  for (const name of ["Example chat", "Section chat"]) {
+    const row = view.getByText(name).closest(".pf-thread") as HTMLElement;
+    const link = within(row).getByRole("link", { name });
+    const archive = within(row).getByRole("button", {
+      name: `Archive: ${name}`,
+    });
+    expect(link.nextElementSibling).toBe(archive);
+    expect(archive.closest("a")).toBeNull();
+    fireEvent.click(archive);
+  }
+  expect(view.inspection.sidebarActionCalls).toEqual([
+    { method: "archive", threadId: "t1" },
+    { method: "archive", threadId: "t2" },
+  ]);
+  expect(navigations).toBe(0);
+  fireEvent.click(view.getByRole("link", { name: "Example chat" }));
+  expect(view.inspection.sidebarActionCalls.at(-1)).toEqual({
+    method: "open",
+    threadId: "t1",
+    options: { split: false },
+  });
+  expect(navigations).toBe(1);
+  view.lifecycle.unmount();
+});
 it("renders a colored indicator for every root and section chat, including while renaming", async () => {
   const running = {
     ...thread,

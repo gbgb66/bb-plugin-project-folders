@@ -1841,6 +1841,21 @@ function ThreadRow({
           )}
         </a>
       )}
+      {!editing && (
+        <button
+          type="button"
+          className="pf-icon pf-thread-archive"
+          title={t("В архив")}
+          aria-label={`${t("В архив")}: ${thread.title || thread.titleFallback || ""}`}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            a.archive(thread.id);
+          }}
+        >
+          <Icon name="Archive" />
+        </button>
+      )}
       {renameError && (
         <span role="alert" className="text-destructive text-xs">
           {renameError}

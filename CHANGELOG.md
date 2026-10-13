@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.43 — Archive beside the thread title
+
+- Show an always-visible archive button after each chat title, before its actions menu, in project roots and sections.
+- Use BB's existing archive action and confirmation behavior. The button archives its own chat without opening it and stays hidden during inline renaming.
+
 ## 0.6.42 — Movable gods and graphic symbols
 
 - Drag project headings/icons to reorder within a group, move to another group or return to the top level. Show drop positions and expand the destination group after moving.
