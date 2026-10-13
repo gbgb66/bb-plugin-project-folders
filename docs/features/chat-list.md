@@ -2,7 +2,7 @@
 title: Chat list and activity
 type: component
 created: 2026-09-27
-updated: 2026-10-09
+updated: 2026-10-13
 status: active
 confidence: high
 tags: [chat-list, activity, sidebar]
@@ -12,6 +12,8 @@ sources:
   - app.tsx
   - chat-settings.tsx
   - server.ts
+  - thread-status.ts
+  - thread-status-indicator.tsx
 ---
 # Chat list and activity
 
@@ -30,6 +32,19 @@ The plugin replaces a flat thread listing with project/section rows and per-plac
 5. Sections can auto-collapse based on activity age; manually stored collapse choices override automatic behavior (`chat-list.ts:95-131`, `chat-list.ts:202-220`).
 
 ## Modes
+
+### Thread indicators in the gbgb66 fork
+
+Every thread row has an 8px status dot, including while renaming. BB's live sidebar hook supplies the state; the plugin does not poll or fetch each thread separately. Hover text and accessible labels use the selected interface language.
+
+| Color | Meaning |
+|---|---|
+| Orange | Running/starting/stopping/provisioning, background work, a pending interaction or queued work |
+| Green | A successful unread result, or an idle thread with attention activity after creation; reading it keeps the dot green |
+| Red | An execution/runtime error, failed queued send or an unread error |
+| Muted | A thread with no result yet |
+
+A current execution or queue failure wins over work. New work wins over a stale unread result from an earlier turn. Questions and approvals stay orange with a waiting tooltip. Reading or renaming alone is not used as evidence of completion. The green indicator reflects BB's completion/attention state; it does not validate the contents of an answer.
 
 | Setting | Values | Effect |
 |---|---|---|

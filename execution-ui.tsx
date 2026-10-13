@@ -156,9 +156,7 @@ export function ExecutionEditor({
     state.fallback?.permissionMode ??
     "auto";
   const shownEnvironment: EnvironmentMode =
-    draft.environmentMode ??
-    state.inherited.environment?.value ??
-    "folder";
+    draft.environmentMode ?? state.inherited.environment?.value ?? "folder";
   const knownMachines = [...(state.knownHosts ?? []), ...state.hosts];
   const labelOf = (id: string) =>
     machineLabel(id, knownMachines, t("неизвестная машина"));
@@ -250,7 +248,10 @@ export function ExecutionEditor({
               providerId: value.providerId,
               model: value.model,
               reasoningLevel: value.reasoningLevel,
-              serviceTier: value.serviceTier,
+              serviceTier:
+                value.serviceTier === "default" || value.serviceTier === "fast"
+                  ? value.serviceTier
+                  : undefined,
             });
           }}
         />
@@ -292,12 +293,11 @@ export function ExecutionEditor({
         />
         <div className="pf-exec-text">
           <span>{t("Своя среда")}</span>
-          {!draft.environmentMode &&
-            state.inherited.environment?.origin && (
-              <span className="pf-exec-from">
-                {originLabel(state.inherited.environment.origin, scope)}
-              </span>
-            )}
+          {!draft.environmentMode && state.inherited.environment?.origin && (
+            <span className="pf-exec-from">
+              {originLabel(state.inherited.environment.origin, scope)}
+            </span>
+          )}
         </div>
         <select
           className="pf-select"
@@ -317,9 +317,7 @@ export function ExecutionEditor({
         <Switch
           checked={!!draft.hostId}
           label={t("Своя машина")}
-          onChange={(on) =>
-            patch({ hostId: on ? seedHostId : undefined })
-          }
+          onChange={(on) => patch({ hostId: on ? seedHostId : undefined })}
         />
         <div className="pf-exec-text">
           <span>{t("Своя машина")}</span>
@@ -344,10 +342,9 @@ export function ExecutionEditor({
               {labelOf(h.id)}
             </option>
           ))}
-          {shownMachine &&
-            !state.hosts.some((h) => h.id === shownMachine) && (
-              <option value={shownMachine}>{labelOf(shownMachine)}</option>
-            )}
+          {shownMachine && !state.hosts.some((h) => h.id === shownMachine) && (
+            <option value={shownMachine}>{labelOf(shownMachine)}</option>
+          )}
         </select>
       </div>
       {scope.kind !== "global" && (

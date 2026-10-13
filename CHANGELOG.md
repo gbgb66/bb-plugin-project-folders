@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.38 — Colored thread indicators (gbgb66 fork)
+
+- Add an orange working/waiting dot, a green answer-ready dot and a red error dot beside every chat, with translated tooltips and accessible labels. New chats without a result remain neutral; reading a completed chat keeps it green.
+- Keep the dot visible while renaming, cover background work and queued messages, and update directly from BB's live sidebar state.
+- Sync declarations to the BB 0.45 SDK (0.6.15) and use the current composer methods so the fork typechecks against the installed BB.
+- Embed the plugin version in the server bundle so full backup exports remain valid when loaded from built artifacts.
+
 ## 0.6.37 — Mark all as read and a shorter section menu
 
 - Section, group and project-root menus gain «Прочитать всё»: it marks every unread chat in the subtree (the whole project from the root), skips archived chats and chats waiting for a question or approval, and is hidden when nothing in the subtree is unread.

@@ -27,6 +27,7 @@ import {
 } from "@get-bb/plugin-sdk";
 import type { NewThreadRequest } from "@get-bb/plugin-sdk/app";
 import { z } from "zod";
+import manifest from "./package.json" with { type: "json" };
 import { makeArchives, archiveSchema } from "./archive";
 import { makeSessionPolicies } from "./session-policy-server";
 import {
@@ -622,11 +623,9 @@ export const rpcContract = defineRpcContract({
     output: cacheKeepaliveSchema,
   },
 });
-const pluginVersion = (
-  JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
-    version: string;
-  }
-).version;
+// Embed the version at build time. A bundled server's adjacent package.json
+// describes its module format and does not contain the plugin version.
+const pluginVersion = manifest.version;
 const safeJson = (text: string): unknown => {
   try {
     return JSON.parse(text);

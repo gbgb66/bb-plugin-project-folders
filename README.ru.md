@@ -1,15 +1,30 @@
 # Проекты и разделы для BB
 
-[![BB](https://img.shields.io/badge/BB-%3E%3D0.43-blue.svg)](https://getbb.app)
-[![Plugin SDK](https://img.shields.io/badge/Plugin%20SDK-%3E%3D0.4.84-green.svg)](https://getbb.app)
+[![BB](https://img.shields.io/badge/BB-%3E%3D0.45-blue.svg)](https://getbb.app)
+[![Plugin SDK](https://img.shields.io/badge/Plugin%20SDK-%3E%3D0.6.15-green.svg)](https://getbb.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/VKirill/bb-plugin-project-folders?color=orange)](https://github.com/VKirill/bb-plugin-project-folders/releases)
+[![GitHub release](https://img.shields.io/github/v/release/VKirill/bb-plugin-project-folders?color=orange)](https://github.com/gbgb66/bb-plugin-project-folders/releases)
 
 > Превращает плоский список чатов BB в дерево проектов и разделов, которые являются настоящими папками на диске. Каждый чат запускается в нужной рабочей папке, у каждого раздела могут быть свои правила для агентов, завершённая работа уходит в архив с возможностью восстановления, а всё дерево можно оформить своими иконками и цветами.
 
-[English](README.md) · [Релизы](https://github.com/VKirill/bb-plugin-project-folders/releases) · [Сообщить о проблеме](https://github.com/VKirill/bb-plugin-project-folders/issues)
+[English](README.md) · [Релизы](https://github.com/gbgb66/bb-plugin-project-folders/releases) · [Сообщить о проблеме](https://github.com/gbgb66/bb-plugin-project-folders/issues)
 
 ![Настройки оформления: готовые стили, режим цвета, настройка уровней с предпросмотром и дерево проектов, оформленное по уровням.](docs/images/appearance.webp)
+
+## Индикаторы тредов в этом форке
+
+Рядом с каждым тредом отображается цветной индикатор:
+
+- Оранжевый — агент работает, идёт фоновая работа или тред ждёт ответа/отправки сообщения.
+- Зелёный — ответ готов. После открытия или прочтения чата индикатор остаётся зелёным.
+- Красный — ошибка выполнения или отправки сообщения. Прочтение чата не скрывает ошибку выполнения.
+- Серый — у нового чата ещё нет готового результата.
+
+Наведите курсор на индикатор, чтобы увидеть пояснение. Цвет меняется автоматически по данным BB; при переименовании треда индикатор остаётся видимым.
+
+Этот форк сохраняет ID `project-folders`. Если установлен исходный плагин, перед заменой сохраните полную резервную копию командой `bb project-folders backup --out /полный/путь/backup.json`. Удаление плагина удаляет его настройки и записи разделов. После установки форка восстановите данные командой `bb project-folders restore /полный/путь/backup.json` и проверьте дерево. Источник исходного плагина: https://github.com/VKirill/bb-plugin-project-folders.
+
+Перед удалением исходного плагина проверьте поле `pluginVersion` в экспорте. Собранная версия 0.6.37 может не записывать его. Сохраните исходный файл и добавьте подтверждённую версию исходного плагина в копию перед восстановлением. В этом форке экспорт из собранного плагина исправлен.
 
 ## Содержание
 
@@ -81,10 +96,10 @@ Launch Studio                     Проект (его корневая папк
 ## Установка
 
 ```sh
-bb plugin install https://github.com/VKirill/bb-plugin-project-folders.git --yes
+bb plugin install https://github.com/gbgb66/bb-plugin-project-folders.git --yes
 ```
 
-Или установите **Projects & Sections** из маркетплейса BB Community. Затем:
+Для этого форка используйте ссылку выше. Маркетплейс BB Community устанавливает исходный плагин автора. Затем:
 
 1. В настройке сайдбара BB выберите список чатов **Projects & Sections**, если BB не выбрал его сам.
 2. Откройте страницу плагина через навигацию плагинов (**Проекты и разделы**) или кнопкой **Управление разделами** внизу дерева.
@@ -392,7 +407,7 @@ bb project-folders sync <thread-id>
 
 ## Требования, данные и ограничения
 
-- BB 0.43+ с Plugin SDK 0.4.84+ (используются экспериментальные поверхности сайдбара и редактора).
+- BB 0.45+ с Plugin SDK 0.6.15+ (используются экспериментальные поверхности сайдбара и редактора).
 - Подключённые устройства на macOS или Linux с локальными папками проектов. Пути Windows не поддерживаются. Проверено вживую на macOS.
 - Аккаунт, API-ключ, платный сервис или внешний сервер не нужны.
 - **Что хранит плагин:** записи разделов, порядок, режимы правил, архивы, журналы переносов, настройки и оформление — в базе плагина на сервере BB. В браузере хранится только выбор языка.

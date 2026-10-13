@@ -2,13 +2,21 @@
 
 Projects & Sections is a BB plugin that organizes project chats into sections backed by folders on connected devices. It also provides per-place rules and chat defaults, archives, history exports, appearance controls, optional session-context filtering and opt-in prompt-cache keepalive for pinned Claude chats.
 
+This fork adds a status dot beside every chat: **orange** while working or waiting, **green** when an answer is ready, and **red** on an execution or queued-send error. A chat with no result yet stays neutral. Hover the dot for the status; opening or reading a finished chat keeps it green.
+
 ## Install
 
 ```sh
-bb plugin install https://github.com/VKirill/bb-plugin-project-folders.git --yes
+bb plugin install https://github.com/gbgb66/bb-plugin-project-folders.git --yes
 ```
 
 In BB, choose Projects & Sections as the sidebar thread list if it is not selected automatically. Open the management page to create a project.
+
+This fork keeps the original `project-folders` plugin ID. If the original is already installed, export its full backup with `bb project-folders backup > project-folders-backup.json` before switching installations, then import that file with `bb project-folders restore project-folders-backup.json`. Removing a plugin deletes its stored settings and section metadata; it does not replace the BB chat database. Keep the backup until the restored tree has been checked.
+
+Before removing the original, check that the export includes `pluginVersion`. The original built 0.6.37 can omit this field; keep the raw file and add the confirmed original version to a copy before restoring. This fork fixes subsequent exports by embedding its version in the built server.
+
+Developer checks: `npm run typecheck`, `npm test`, `npm run build`, then `npm run verify:build`. The last command loads the built server, checks its exported version and a full backup round-trip, and checks the compiled indicator colors.
 
 ## Documentation
 

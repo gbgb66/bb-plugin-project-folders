@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeAll, afterEach, expect, it } from "vitest";
-import { fireEvent, waitFor, cleanup } from "@testing-library/react";
+import { fireEvent, waitFor, cleanup, within } from "@testing-library/react";
 import { loadPluginApp, renderSlot } from "@get-bb/plugin-sdk/testing/app";
 import type { PluginSidebarThread } from "@get-bb/plugin-sdk/app";
 import { installTestMatchMedia, setCompactViewport } from "./test-match-media";
@@ -84,6 +84,65 @@ function mount(failMove = false) {
     },
   );
 }
+it("renders a colored indicator for every root and section chat, including while renaming", async () => {
+  const running = {
+    ...thread,
+    id: "working",
+    title: "Working chat",
+    status: "active",
+    indicator: "runtime",
+  };
+  const ready = {
+    ...thread,
+    id: "ready",
+    title: "Ready chat",
+    status: "idle",
+    latestAttentionAt: thread.createdAt + 1,
+  };
+  const failed = {
+    ...thread,
+    id: "failed",
+    title: "Failed chat",
+    status: "error",
+  };
+  const view = renderSlot(
+    app.threadLists[0]!,
+    { activeThreadId: null, onNavigate() {} },
+    {
+      sidebarThreads: {
+        threads: [running, ready, failed] as PluginSidebarThread[],
+        projects: [],
+      },
+      rpc: {
+        list: () => ({
+          folders: [folder],
+          roots: [root],
+          bindings: { e1: "f1" },
+          errors: [],
+        }),
+      },
+    },
+  );
+  const title = await view.findByText("Ready chat");
+  for (const [name, label, color] of [
+    ["Working chat", "Working", "bg-orange-600"],
+    ["Ready chat", "Answer ready", "bg-green-600"],
+    ["Failed chat", "Error", "bg-red-600"],
+  ]) {
+    const row = view.getByText(name).closest(".pf-thread") as HTMLElement;
+    expect(
+      within(row).getByRole("img", { name: label }).classList.contains(color),
+    ).toBe(true);
+  }
+  fireEvent.doubleClick(title);
+  const input = await view.findByDisplayValue("Ready chat");
+  expect(
+    within(input.closest(".pf-thread") as HTMLElement).getByRole("img", {
+      name: "Answer ready",
+    }),
+  ).toBeTruthy();
+  view.lifecycle.unmount();
+});
 it("opens the project menu on right-click with the same actions as the ellipsis", async () => {
   const view = mount();
   fireEvent.contextMenu(await view.findByText("Project"));
@@ -650,8 +709,12 @@ it("opens the folder ellipsis on a phone-width viewport without crashing", async
   expect(
     view.getByRole("menuitemradio", { name: /Recent activity/ }),
   ).toBeTruthy();
-  expect(view.getByRole("menuitemradio", { name: /Active first/ })).toBeTruthy();
-  expect(view.getByRole("menuitemradio", { name: /Manual order/ })).toBeTruthy();
+  expect(
+    view.getByRole("menuitemradio", { name: /Active first/ }),
+  ).toBeTruthy();
+  expect(
+    view.getByRole("menuitemradio", { name: /Manual order/ }),
+  ).toBeTruthy();
   view.lifecycle.unmount();
 });
 
@@ -776,7 +839,9 @@ it("marks unread subtree chats read and skips archived and pending", async () =>
     },
   );
   fireEvent.contextMenu(await view.findByText("Section"));
-  fireEvent.click(await view.findByRole("menuitem", { name: "Mark all as read" }));
+  fireEvent.click(
+    await view.findByRole("menuitem", { name: "Mark all as read" }),
+  );
   await waitFor(() => {
     const reads = view.inspection.sidebarActionCalls.filter(
       (call) => call.method === "setRead",
@@ -811,7 +876,9 @@ it("marks every unread project chat from the project root menu", async () => {
     },
   );
   fireEvent.contextMenu(await view.findByText("Project"));
-  fireEvent.click(await view.findByRole("menuitem", { name: "Mark all as read" }));
+  fireEvent.click(
+    await view.findByRole("menuitem", { name: "Mark all as read" }),
+  );
   await waitFor(() => {
     const reads = view.inspection.sidebarActionCalls.filter(
       (call) => call.method === "setRead",

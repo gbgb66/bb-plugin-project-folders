@@ -2,6 +2,10 @@
 
 A sidebar tree of projects, sections and subsections that are real folders on your devices, with the chats of each folder inside it. A chat started from a section runs with that folder as its working directory. Every heading has a new-chat button and a menu for new sections, rules, appearance, sorting, rename, change path and archive. Names turn bold when a chat below them is unread, inactive sections collapse after a set time (2 hours by default), and each list shows its newest chats up to a limit you choose.
 
+## Thread status colors
+
+Every chat has a live status dot: orange for work or waiting, green for a ready answer, and red for execution or queued-send errors. New chats with no result stay neutral. Hover for an explanation; reading a completed chat does not clear its green status. Pending questions and approvals stay orange with a waiting label. The status uses BB's sidebar data and needs no polling or extra service.
+
 ## Rules beside the work
 
 Projects and sections of any depth get AGENTS.md from a project or sections template when they are created. The plugin writes only between its own markers at the end of the file and never touches your text above them. Each project or section can use the shared template, its own template, or its own hand-written file. Custom rules can go into AGENTS.md and CLAUDE.md, into the instructions of chats started from BB, or both. A startup instruction adds a one-shot request to the first message of every new chat. Apply to existing sections rewrites every managed block at once.
@@ -32,4 +36,4 @@ The management page and the plugin page in BB settings show the same settings: C
 
 ## Requirements
 
-BB 0.43 or later and connected macOS or Linux devices with local-path project sources. Windows paths are not supported. No account, API key or external service is needed. Chat history stays in BB; the plugin also exports it to a hidden .bb/chats folder inside each section, which is not a full backup. Some BB interfaces this plugin uses are experimental.
+BB 0.45 or later and connected macOS or Linux devices with local-path project sources. Windows paths are not supported. No account, API key or external service is needed. Chat history stays in BB; the plugin also exports it to a hidden .bb/chats folder inside each section, which is not a full backup. Some BB interfaces this plugin uses are experimental.

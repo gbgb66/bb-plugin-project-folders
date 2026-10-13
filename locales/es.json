@@ -1,4 +1,10 @@
 {
+  "Работает": "En ejecución",
+  "Ответ готов": "Respuesta lista",
+  "Ошибка": "Error",
+  "Ожидает вашего ответа": "Esperando tu respuesta",
+  "В очереди": "En cola",
+  "Нет готового ответа": "Sin respuesta todavía",
   "Выбор папки": "Elegir carpeta",
   "Новый раздел": "Nueva sección",
   "Правила работы": "Reglas de trabajo",

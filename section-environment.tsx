@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useComposer,
-  useComposerView,
   useRealtime,
   useRpc,
   type PluginEnvironmentProviderInputsProps,
@@ -140,7 +139,7 @@ export function SectionEnvironmentInputs({
 export function ComposerSectionBanner() {
   useLanguage();
   const rpc = useRpc<typeof rpcContract>();
-  const view = useComposerView();
+  const view = useComposer();
   const projectId =
     view.scope.kind === "new-thread" ? view.scope.projectId : null;
   const [tree, setTree] = useState<
@@ -182,7 +181,7 @@ export function ComposerSectionBanner() {
  * BB's composer knows projects, not folders, and its environment picker needs
  * two clicks to reach ours. This is the one click: choose a section, and the
  * composer's environment switches to "Project section" on that section's
- * machine — `experimental_setSelection` applies it exactly as if the pickers
+ * machine — `setSelection` applies it exactly as if the pickers
  * had been used by hand.
  */
 export function SectionComposerAction() {
@@ -192,7 +191,7 @@ export function SectionComposerAction() {
   const chipTaken = useChipTaken();
   const rpc = useRpc<typeof rpcContract>();
   const composer = useComposer();
-  const view = useComposerView();
+  const view = useComposer();
   const projectId =
     view.scope.kind === "new-thread" ? view.scope.projectId : null;
   const [tree, setTree] = useState<SectionTree | null>(null);
@@ -212,7 +211,7 @@ export function SectionComposerAction() {
   // A sent message starts a fresh draft: the section goes with it.
   useEffect(
     () =>
-      composer.experimental_onSubmitted(() => {
+      composer.onSubmitted(() => {
         setChosen(null);
         rememberPick(null);
       }),
@@ -284,7 +283,7 @@ export function SectionComposerAction() {
         folderId: folder.id,
       });
       rememberPick({ projectId, hostId, folderId: folder.id });
-      await composer.experimental_setSelection({
+      await composer.setSelection({
         environment: worktree
           ? managedWorktreeEnvironment(hostId)
           : {

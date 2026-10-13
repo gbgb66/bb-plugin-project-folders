@@ -1,5 +1,11 @@
 // English fallback and Russian translation catalog. User content is never translated.
 export const english = {
+  Работает: "Working",
+  "Ответ готов": "Answer ready",
+  Ошибка: "Error",
+  "Ожидает вашего ответа": "Waiting for your response",
+  "В очереди": "Queued",
+  "Нет готового ответа": "No answer yet",
   "Скрыть из дерева": "Hide from the tree",
   "Показать в дереве": "Show in the tree",
   "Показывать скрытые проекты и разделы": "Show hidden projects and sections",
@@ -110,7 +116,7 @@ export const english = {
     "Sections are project folders. Chat history and supporting files are stored in the hidden folder",
   "каждого раздела.": "inside each section.",
   "Дерево папок и чатов": "Folder and chat tree",
-  "Сортировка": "Sorting",
+  Сортировка: "Sorting",
   "Сортировка чатов": "Chat sorting",
   "Сортировка разделов": "Section sorting",
   "Активные сверху": "Active first",
@@ -530,9 +536,9 @@ export const english = {
   "Работает только для закреплённых чатов Claude. Каждый пинг стоит чтение кеша всего контекста и короткий ответ; это экономит полную перезапись контекста при возвращении через час.":
     "Works only for pinned Claude chats. Each ping costs a cache read of the whole context plus a short answer; it saves a full prompt write when you return after an hour.",
   "Другие действия": "More actions",
-  "Действия": "Actions",
-  "Развернуть": "Expand",
-  "Свернуть": "Collapse",
+  Действия: "Actions",
+  Развернуть: "Expand",
+  Свернуть: "Collapse",
   "только в сессии BB": "BB sessions only",
   "В режиме «Свой файл» плагин не пишет в файлы, поэтому свои правила действуют только в сессиях, запущенных из BB.":
     "In Own file mode the plugin does not write to files, so custom rules only apply in sessions started from BB.",
