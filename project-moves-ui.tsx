@@ -306,8 +306,13 @@ export function ProjectGroupDropTarget({
         e.dataTransfer.dropEffect = "move";
         moves.highlight({ kind: "group", id: groupId, groupId });
       }}
-      onDrop={(e) => {
-        if (!moves?.accept(e)) return;
+      onDropCapture={(e) => {
+        if (
+          !moves?.accept(e) ||
+          moves.drop?.kind !== "group" ||
+          moves.drop.id !== groupId
+        )
+          return;
         e.preventDefault();
         e.stopPropagation();
         void moves.move(moves.dragged!, groupId);

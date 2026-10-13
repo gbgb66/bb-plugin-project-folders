@@ -28,12 +28,12 @@ const roots = ["ЗЕВС", "NEPTUN", "Other"].map((name, i) => ({
   parentId: null,
   path: `/work/${i}`,
 }));
-function mount(panel = false, fail = false) {
+function mount(panel = false, fail = false, nested = false) {
   let data = JSON.stringify({
     version: 1,
     groups: [
       { id: "g1", name: "Олимп", projectIds: ["p1", "p2"] },
-      { id: "g2", name: "Other group", projectIds: [] },
+      { id: "g2", name: "Other group", projectIds: nested ? ["p3"] : [] },
     ],
   });
   const groups = makeProjectGroups({
@@ -63,7 +63,16 @@ function mount(panel = false, fail = false) {
       rpc: {
         list: () => ({
           roots,
-          folders: [],
+          folders: nested
+            ? [
+                {
+                  ...roots[2],
+                  id: "s3",
+                  name: "Nested section",
+                  path: "/work/2/nested",
+                },
+              ]
+            : [],
           bindings: {},
           places: {},
           errors: [],
@@ -150,6 +159,27 @@ it("reorders gods by dropping above a sibling project heading", async () => {
         ),
       ].map((e) => e.getAttribute("data-tree-project-id")),
     ).toEqual(["p2", "p1"]),
+  );
+  view.lifecycle.unmount();
+});
+it("accepts a project drop over a nested section inside the destination group", async () => {
+  const { view, place } = mount(false, false, true);
+  const dt = await start(view, "p1");
+  const target = (await view.findByText("Nested section")).closest(
+    ".pf-heading",
+  )!;
+  fireEvent.dragOver(target, { dataTransfer: dt });
+  fireEvent.drop(target, { dataTransfer: dt });
+  await waitFor(() =>
+    expect(place).toHaveBeenCalledWith({ projectId: "p1", groupId: "g2" }),
+  );
+  await waitFor(() =>
+    expect(
+      view
+        .getByText("ЗЕВС")
+        .closest("[data-project-group-id]")
+        ?.getAttribute("data-project-group-id"),
+    ).toBe("g2"),
   );
   view.lifecycle.unmount();
 });
