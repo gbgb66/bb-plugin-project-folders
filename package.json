@@ -1,6 +1,6 @@
 {
   "name": "bb-plugin-project-folders",
-  "version": "0.6.40",
+  "version": "0.6.41",
   "type": "module",
   "engines": {
     "bb": ">=0.45.0",
@@ -8,7 +8,7 @@
   },
   "bb": {
     "name": "Projects & Sections",
-    "description": "Group existing BB projects, organize folder-backed sections, and show yellow working, green ready and red error indicators.",
+    "description": "Group BB projects with god portrait avatars, folder-backed sections, and yellow working, green ready and red error indicators.",
     "branding": {
       "icon": "Folder"
     },

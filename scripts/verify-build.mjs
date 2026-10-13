@@ -19,6 +19,10 @@ const host = createFakePluginHost({
 });
 await plugin(host.bb);
 try {
+  await host.harness.behavior.callRpc("project_avatar_set", {
+    projectId: "p-build",
+    avatarId: "zeus",
+  });
   const group = await host.harness.behavior.callRpc("project_group_save", {
     name: "Build group",
     projectIds: ["p-build"],
@@ -37,6 +41,8 @@ try {
   await host.harness.behavior.callRpc("backup_import", { backup: exported });
   const restored = await host.harness.behavior.callRpc("backup_export", null);
   assert.deepEqual(restored.tables, exported.tables);
+  const prefs = await host.harness.behavior.callRpc("prefs_get", null);
+  assert.equal(prefs.items["p:p-build"].icon, "avatar:zeus");
   assert.deepEqual(
     await host.harness.behavior.callRpc("project_groups_list", null),
     [group],
@@ -60,8 +66,29 @@ try {
   assert.ok(css.includes("@keyframes pf-status-spin"));
   assert.ok(css.includes("prefers-reduced-motion"));
   assert.ok(css.includes(".pf-project-group"));
+  assert.ok(css.includes(".pf-god-avatar"));
+  const images = JSON.parse(
+    readFileSync(
+      new URL("../assets/gods/avatars.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const appJs = readFileSync(
+    new URL("../dist/app.js", import.meta.url),
+    "utf8",
+  );
+  assert.equal(Object.keys(images).length, 6);
+  for (const [id, src] of Object.entries(images)) {
+    const png = readFileSync(
+      new URL(`../assets/gods/${id}.png`, import.meta.url),
+    );
+    assert.equal(png.readUInt32BE(16), 128);
+    assert.equal(png.readUInt32BE(20), 128);
+    assert.equal(src, "data:image/png;base64," + png.toString("base64"));
+    assert.ok(appJs.includes(src), `Missing bundled avatar ${id}`);
+  }
   console.log(
-    "Build verified: project groups, thread indicators, version metadata and a lossless backup round-trip.",
+    "Build verified: god avatars, project groups, thread indicators, version metadata and a lossless backup round-trip.",
   );
 } finally {
   await host.harness.lifecycle.dispose();

@@ -4,6 +4,8 @@ Projects & Sections is a BB plugin that organizes project chats into sections ba
 
 This fork adds a status indicator beside every chat: a **spinning yellow ring** while working or waiting, **green** when an answer is ready, and **red** on an execution or queued-send error. A chat with no result yet stays neutral. Hover the indicator for the status; opening or reading a finished chat keeps it green.
 
+Replace a project's folder icon with a round **god portrait**: Zeus, Neptune, Hermes, Athena, Hephaestus or Prometheus. Select it in **Appearance → Icon → Choose → God avatars**, or run `bb project-folders project-avatar <project-id> <avatar-id> --json`. List avatar IDs with `bb project-folders avatars --json`; pass `-` as the avatar ID to return to the inherited icon. Portrait choices are saved with the project's appearance, including backups. The images are bundled in the plugin and work without an external image host.
+
 Create a **project group** such as “Олимп” above existing BB projects. Click **New project group** in the sidebar or management tree, enter its name and select the projects. The group’s menu lets you rename it or change its members. **Dissolve group** returns its projects to the top level after confirmation. Project IDs, chats, files, working paths and rules stay intact; each project belongs to at most one group. Groups can be collapsed and are included in plugin backups.
 
 ```sh

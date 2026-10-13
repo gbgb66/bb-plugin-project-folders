@@ -122,6 +122,7 @@ import {
   ZapIcon,
 } from "@hugeicons/core-free-icons";
 import { t } from "./i18n";
+import { GOD_AVATARS, godAvatar } from "./god-avatars";
 import { Button } from "./components/ui/button";
 import { Icon } from "./components/ui/icon";
 import {
@@ -406,6 +407,24 @@ export function Glyph({
     "pf-glyph" +
     (fill === "badge" ? " pf-glyph-badge" : "") +
     (css ? " pf-glyph-colored" : "");
+  const avatar = godAvatar(icon);
+  if (avatar)
+    return (
+      <span
+        className="pf-glyph pf-glyph-avatar"
+        aria-hidden="true"
+        data-avatar-id={avatar.id}
+      >
+        <img
+          className="pf-god-avatar"
+          src={avatar.src}
+          alt=""
+          width={24}
+          height={24}
+          draggable={false}
+        />
+      </span>
+    );
   if (icon.startsWith("emoji:"))
     return (
       <span className={cls} style={style} aria-hidden="true">
@@ -465,6 +484,34 @@ function IconPicker({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
+      {GOD_AVATARS.some(
+        (a) => !q || a.id.includes(q) || t(a.name).toLowerCase().includes(q),
+      ) && (
+        <div>
+          <div className="pf-picker-group">{t("Аватарки богов")}</div>
+          <div className="pf-picker-grid">
+            {GOD_AVATARS.filter(
+              (a) =>
+                !q || a.id.includes(q) || t(a.name).toLowerCase().includes(q),
+            ).map((avatar) => (
+              <button
+                type="button"
+                key={avatar.id}
+                title={t(avatar.name)}
+                aria-label={t(avatar.name)}
+                aria-pressed={value === `avatar:${avatar.id}`}
+                className={
+                  "pf-picker-cell" +
+                  (value === `avatar:${avatar.id}` ? " pf-selected" : "")
+                }
+                onClick={() => onChange(`avatar:${avatar.id}`)}
+              >
+                <Glyph icon={`avatar:${avatar.id}`} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {ICON_GROUPS.map((group) => {
         const names = Object.keys(group.icons).filter(
           (n) => !q || n.toLowerCase().includes(q),
@@ -1035,7 +1082,11 @@ export function TransferSettings() {
           "Полный файл содержит разделы, правила, архивы, оформление и настройки. Очереди экспорта чатов и незавершённые переносы в него не входят.",
         )}
         actions={
-          <Button size="sm" variant="outline" onClick={() => void exportEverything()}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => void exportEverything()}
+          >
             <Icon name="Download" />
             {t("Экспортировать всё")}
           </Button>

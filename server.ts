@@ -27,6 +27,7 @@ import {
 } from "@get-bb/plugin-sdk";
 import type { NewThreadRequest } from "@get-bb/plugin-sdk/app";
 import { z } from "zod";
+import { GOD_AVATAR_IDS, GOD_AVATAR_NAMES } from "./god-avatar-catalog";
 import {
   makeProjectGroups,
   PROJECT_GROUPS_KEY,
@@ -167,7 +168,17 @@ export const sectionsContract = defineRpcContract({
     }),
   },
 });
+const projectAvatarSetSchema = z
+  .object({
+    projectId: z.string().min(1),
+    avatarId: z.enum(GOD_AVATAR_IDS).nullable(),
+  })
+  .strict();
 export const rpcContract = defineRpcContract({
+  project_avatar_set: {
+    input: projectAvatarSetSchema,
+    output: z.object({ ok: z.literal(true) }),
+  },
   project_groups_list: {
     input: z.null(),
     output: z.array(projectGroupSchema),
@@ -2204,6 +2215,21 @@ export default async function plugin(bb: BbPluginApi) {
     place: executionPlace,
   });
   const handlers: PluginRpcHandlers<typeof rpcContract> = {
+    project_avatar_set: async (input) => {
+      const { projectId, avatarId } = projectAvatarSetSchema.parse(input);
+      await validateGroupProjects([projectId]);
+      const key = `p:${projectId}`;
+      const row = db
+        .prepare("SELECT data FROM item_styles WHERE key=?")
+        .get(key) as { data: string } | undefined;
+      const current = row
+        ? (parseItemStyles({ [key]: safeJson(row.data) })[key] ?? {})
+        : {};
+      const style = { ...current };
+      if (avatarId) style.icon = `avatar:${avatarId}`;
+      else delete style.icon;
+      return handlers.item_style_save({ key, style });
+    },
     project_groups_list: () => projectGroups.list(),
     project_group_save: async (input) => {
       const parsed = projectGroupSaveSchema.parse(input);
@@ -3797,6 +3823,18 @@ export default async function plugin(bb: BbPluginApi) {
     summary: "Project sections and chat history",
     commands: [
       {
+        name: "avatars",
+        summary: "List built-in god portrait avatars",
+        usage: "bb project-folders avatars",
+      },
+      {
+        name: "project-avatar",
+        summary:
+          "Replace a project folder icon with a god portrait; - restores inheritance",
+        usage:
+          "bb project-folders project-avatar <project-id> <avatar-id-or-dash>",
+      },
+      {
         name: "project-groups",
         summary: "List visual groups of existing BB projects",
         usage: "bb project-folders project-groups",
@@ -3934,7 +3972,18 @@ export default async function plugin(bb: BbPluginApi) {
             argv[i - 1] !== "--out",
         );
         let value: unknown;
-        if (args[0] === "project-groups") {
+        if (args[0] === "avatars") {
+          value = GOD_AVATAR_IDS.map((id) => ({
+            id,
+            name: GOD_AVATAR_NAMES[id],
+          }));
+        } else if (args[0] === "project-avatar") {
+          const input = projectAvatarSetSchema.parse({
+            projectId: args[1],
+            avatarId: args[2] === "-" ? null : args[2],
+          });
+          value = await handlers.project_avatar_set(input);
+        } else if (args[0] === "project-groups") {
           value = projectGroups.list();
         } else if (args[0] === "project-group-create") {
           value = await handlers.project_group_save(

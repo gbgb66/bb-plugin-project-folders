@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.41 — God portrait avatars
+
+- Add six round portraits for Zeus, Neptune, Hermes, Athena, Hephaestus and Prometheus to the appearance picker, project rows and management tree.
+- Embed the images in the app bundle so they load on any device without an external image service.
+- Persist avatar choices in the existing item styles and full backups. `project-avatar` selects or clears an avatar without changing other appearance preferences.
+
 ## 0.6.40 — Groups of existing projects
 
 - Create a visual parent such as «Олимп» above independent BB projects, with member selection and rename in both the sidebar and management tree.

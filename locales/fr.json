@@ -426,5 +426,12 @@
   "Проекты в группе": "Projets du groupe",
   "В группе:": "Dans le groupe :",
   "Объединяет существующие проекты в дереве. Чаты и рабочие папки остаются на своих местах.": "Regroupe les projets existants dans l’arborescence. Les chats et les dossiers de travail restent à leur emplacement actuel.",
-  "Проекты вернутся на верхний уровень. Чаты и файлы сохранятся.": "Les projets reviennent au niveau supérieur. Les chats et les fichiers sont conservés."
+  "Проекты вернутся на верхний уровень. Чаты и файлы сохранятся.": "Les projets reviennent au niveau supérieur. Les chats et les fichiers sont conservés.",
+  "Аватарки богов": "Avatars des dieux",
+  "Зевс": "Zeus",
+  "Нептун": "Neptune",
+  "Гермес": "Hermès",
+  "Афина": "Athéna",
+  "Гефест": "Héphaïstos",
+  "Прометей": "Prométhée"
 }

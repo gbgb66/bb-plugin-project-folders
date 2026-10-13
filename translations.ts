@@ -1,5 +1,12 @@
 // English fallback and Russian translation catalog. User content is never translated.
 export const english = {
+  "Аватарки богов": "God avatars",
+  Зевс: "Zeus",
+  Нептун: "Neptune",
+  Гермес: "Hermes",
+  Афина: "Athena",
+  Гефест: "Hephaestus",
+  Прометей: "Prometheus",
   "Новая группа проектов": "New project group",
   "Изменить группу": "Edit group",
   "Убрать группу": "Dissolve group",

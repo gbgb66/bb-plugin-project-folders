@@ -81,6 +81,19 @@
 .pf-project {
   margin: 0 0 2px;
 }
+.pf .pf-glyph.pf-glyph-avatar {
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+.pf-god-avatar {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
 .pf-project-group > .pf-children {
   padding-bottom: 8px;
   border-inline-start: 1px solid var(--border);

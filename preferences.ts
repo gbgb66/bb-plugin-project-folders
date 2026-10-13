@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GOD_AVATAR_IDS } from "./god-avatar-catalog";
 
 /**
  * Plugin preferences shared by every device: the chat list, the tree view and
@@ -45,7 +46,12 @@ export type LevelKey = (typeof LEVELS)[number];
 const iconValue = z
   .string()
   .max(64)
-  .regex(/^(icon:[A-Za-z0-9]{1,48}|emoji:.{1,16})$/u);
+  .regex(
+    new RegExp(
+      `^(icon:[A-Za-z0-9]{1,48}|emoji:.{1,16}|avatar:(${GOD_AVATAR_IDS.join("|")}))$`,
+      "u",
+    ),
+  );
 /** A plain pattern: RPC schemas travel as JSON Schema, where refinements are lost. */
 const colorValue = z
   .string()
