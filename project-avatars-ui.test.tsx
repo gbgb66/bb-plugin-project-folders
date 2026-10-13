@@ -65,7 +65,7 @@ it("renders the six distinct embedded portraits instead of folders while keeping
     const avatar = heading.querySelector(
       `[data-avatar-id="${GOD_AVATAR_IDS[i]}"] img`,
     )!;
-    expect(avatar.getAttribute("src")).toMatch(/^data:image\/png;base64,/);
+    expect(avatar.getAttribute("src")).toMatch(/^data:image\/svg\+xml;base64,/);
     expect(avatar.getAttribute("alt")).toBe("");
     expect(heading.querySelector("[data-icon=Folder]")).toBeNull();
     sources.add(avatar.getAttribute("src")!);
@@ -81,7 +81,9 @@ it("renders the six distinct embedded portraits instead of folders while keeping
 });
 
 it("selects a god portrait in the existing appearance dialog and saves it for that project", async () => {
-  const save = vi.fn((_input: { key: string; style: unknown }) => ({ ok: true }));
+  const save = vi.fn((_input: { key: string; style: unknown }) => ({
+    ok: true,
+  }));
   const view = renderSlot(
     app.navPanels[0]!,
     { subPath: "" },

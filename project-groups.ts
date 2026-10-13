@@ -19,6 +19,8 @@ export const projectGroupPlaceSchema = z
   .object({
     projectId: z.string().min(1),
     groupId: z.string().min(1).nullable(),
+    /** Insert before this sibling; null or omitted appends. */
+    beforeProjectId: z.string().min(1).nullable().optional(),
   })
   .strict();
 export const projectGroupRemoveSchema = z
@@ -94,18 +96,32 @@ export function makeProjectGroups(store: {
       return group;
     },
     place(input: z.input<typeof projectGroupPlaceSchema>) {
-      const { projectId, groupId } = projectGroupPlaceSchema.parse(input);
+      const { projectId, groupId, beforeProjectId } =
+        projectGroupPlaceSchema.parse(input);
       const groups = read();
       if (groupId && !groups.some((g) => g.id === groupId))
         throw new Error("Project group not found.");
+      if (beforeProjectId === projectId)
+        throw new Error("A project cannot be placed before itself.");
+      if (
+        groupId &&
+        beforeProjectId &&
+        !groups
+          .find((g) => g.id === groupId)
+          ?.projectIds.includes(beforeProjectId)
+      )
+        throw new Error("The destination project is not in this group.");
       write(
-        groups.map((g) => ({
-          ...g,
-          projectIds:
-            g.id === groupId
-              ? [...g.projectIds.filter((id) => id !== projectId), projectId]
-              : g.projectIds.filter((id) => id !== projectId),
-        })),
+        groups.map((g) => {
+          const projectIds = g.projectIds.filter((id) => id !== projectId);
+          if (g.id === groupId) {
+            const index = beforeProjectId
+              ? projectIds.indexOf(beforeProjectId)
+              : projectIds.length;
+            projectIds.splice(index, 0, projectId);
+          }
+          return { ...g, projectIds };
+        }),
       );
     },
     remove(input: z.input<typeof projectGroupRemoveSchema>) {

@@ -5,7 +5,7 @@ import {
   godAvatarId,
 } from "./god-avatar-catalog";
 
-/** Embedded PNGs work on every device without an external image host. */
+/** Embedded vector emblems work on every device without an external image host. */
 export const GOD_AVATARS = GOD_AVATAR_IDS.map((id) => ({
   id,
   name: GOD_AVATAR_NAMES[id],

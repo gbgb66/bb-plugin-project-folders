@@ -2,6 +2,7 @@ import { FolderBrowser } from "./folder-browser";
 import { ThreadSectionLabel } from "./thread-section-label";
 import { ThreadStatusIndicator } from "./thread-status-indicator";
 import { GroupedProjects } from "./project-groups-ui";
+import { ProjectDragHandle, ProjectMoveMenu } from "./project-moves-ui";
 import type { ProjectGroup } from "./project-groups";
 import {
   MoveDialog,
@@ -2031,6 +2032,7 @@ function FolderHeading({
         (highlighted && refused ? " pf-drop-refused" : "")
       }
       style={row.style}
+      draggable={root}
       onContextMenu={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -2049,7 +2051,13 @@ function FolderHeading({
           name={closed ? "ChevronRight" : "ChevronDown"}
           className="pf-chevron"
         />
-        <Glyph {...look} />
+        {root ? (
+          <ProjectDragHandle projectId={folder.projectId}>
+            <Glyph {...look} />
+          </ProjectDragHandle>
+        ) : (
+          <Glyph {...look} />
+        )}
         <span>{folder.name}</span>
         {device && <span className="pf-host-badge">{device}</span>}
       </button>
@@ -2106,6 +2114,7 @@ function FolderHeading({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {root && <ProjectMoveMenu projectId={folder.projectId} />}
           {onMarkAllRead && (
             <DropdownMenuItem onSelect={onMarkAllRead}>
               <Icon name="Check" />
@@ -2179,7 +2188,7 @@ function Tree(props: PluginThreadListProps) {
   const { prefs, look } = useFolderLook(data.folders);
   const listSettings = prefs.chatList;
   // Hidden projects and sections stay out of the tree unless «Show hidden» is on; their chats keep working.
-  const { items, saveItem } = usePrefs();
+  const { items, saveItem, savePrefs } = usePrefs();
   const showHidden = prefs.view.showHidden;
   const hiddenKey = (f: Folder, root: boolean) =>
     root ? projectKey(f.projectId) : folderKey(f.id);
@@ -2679,6 +2688,12 @@ function Tree(props: PluginThreadListProps) {
       {status === "loading" && <p>{t("Загрузка…")}</p>}
       <GroupedProjects
         groups={data.projectGroups}
+        onManualOrder={() =>
+          savePrefs({
+            ...prefs,
+            chatList: { ...prefs.chatList, sortSectionsByActivity: false },
+          })
+        }
         projects={[
           ...data.roots
             .filter(
@@ -3062,9 +3077,13 @@ function Panel({ subPath }: PluginNavPanelProps) {
     null,
   );
   const [copyRoot, setCopyRoot] = useState<Folder | null>(null);
-  const { look } = useFolderLook(data.folders);
+  const { look, prefs: panelPrefs } = useFolderLook(data.folders);
   // Hide/show from the management page, the same flag the sidebar menu sets.
-  const { items: itemStyles, saveItem: saveItemStyle } = usePrefs();
+  const {
+    items: itemStyles,
+    saveItem: saveItemStyle,
+    savePrefs: savePanelPrefs,
+  } = usePrefs();
   const panelHiddenKey = (f: Folder, root: boolean) =>
     root ? projectKey(f.projectId) : folderKey(f.id);
   const panelHidden = (f: Folder, root: boolean) =>
@@ -3469,7 +3488,13 @@ function Panel({ subPath }: PluginNavPanelProps) {
             title={f.path}
             onClick={() => setSelectedKey(key)}
           >
-            <Glyph {...folderLook} />
+            {root ? (
+              <ProjectDragHandle projectId={f.projectId}>
+                <Glyph {...folderLook} />
+              </ProjectDragHandle>
+            ) : (
+              <Glyph {...folderLook} />
+            )}
             <span>{f.name}</span>
           </button>
           <DropdownMenu
@@ -3486,6 +3511,7 @@ function Panel({ subPath }: PluginNavPanelProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {root && <ProjectMoveMenu projectId={f.projectId} />}
               {folderUnread && (
                 <DropdownMenuItem
                   onSelect={() =>
@@ -3613,15 +3639,22 @@ function Panel({ subPath }: PluginNavPanelProps) {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem disabled={at <= 0} onSelect={() => move(-1)}>
-                {t("Сдвинуть вверх")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={at < 0 || at >= siblings.length - 1}
-                onSelect={() => move(1)}
-              >
-                {t("Сдвинуть вниз")}
-              </DropdownMenuItem>
+              {!root && (
+                <>
+                  <DropdownMenuItem
+                    disabled={at <= 0}
+                    onSelect={() => move(-1)}
+                  >
+                    {t("Сдвинуть вверх")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={at < 0 || at >= siblings.length - 1}
+                    onSelect={() => move(1)}
+                  >
+                    {t("Сдвинуть вниз")}
+                  </DropdownMenuItem>
+                </>
+              )}
               {group && (
                 <DropdownMenuItem
                   variant="destructive"
@@ -4754,6 +4787,15 @@ function Panel({ subPath }: PluginNavPanelProps) {
           )}
           <GroupedProjects
             groups={data.projectGroups}
+            onManualOrder={() =>
+              savePanelPrefs({
+                ...panelPrefs,
+                chatList: {
+                  ...panelPrefs.chatList,
+                  sortSectionsByActivity: false,
+                },
+              })
+            }
             projects={data.roots
               .filter(
                 (r, i) =>

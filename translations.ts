@@ -1,5 +1,10 @@
 // English fallback and Russian translation catalog. User content is never translated.
 export const english = {
+  "Перетащить проект": "Drag project",
+  "Вне групп": "Outside groups",
+  Выше: "Move up",
+  Ниже: "Move down",
+  "Проект перемещён": "Project moved",
   "Аватарки богов": "God avatars",
   Зевс: "Zeus",
   Нептун: "Neptune",

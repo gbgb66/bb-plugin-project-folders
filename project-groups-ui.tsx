@@ -1,4 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { isValidElement, useState, type ReactNode } from "react";
+import {
+  ProjectMoveProvider,
+  ProjectMoveEntry,
+  ProjectGroupDropTarget,
+  ProjectTopLevelDropTarget,
+} from "./project-moves-ui";
 import { useRpc } from "@get-bb/plugin-sdk/app";
 import type { rpcContract } from "./server";
 import type { ProjectGroup } from "./project-groups";
@@ -43,12 +49,14 @@ export function GroupedProjects({
   entries,
   refresh,
   unreadProjects = [],
+  onManualOrder,
 }: {
   groups: ProjectGroup[];
   projects: { id: string; name: string }[];
   entries: { projectId: string; element: ReactNode }[];
   refresh(): void;
   unreadProjects?: string[];
+  onManualOrder?(): Promise<void>;
 }) {
   const rpc = useRpc<typeof rpcContract>();
   const [collapsed, setCollapsed] = useState(readCollapsed);
@@ -100,8 +108,36 @@ export function GroupedProjects({
     }
   };
   const memberships = new Set(groups.flatMap((g) => g.projectIds));
+  const renderEntry = (e: (typeof entries)[number], index: number) => (
+    <ProjectMoveEntry
+      key={
+        isValidElement(e.element)
+          ? (e.element.key ?? `${e.projectId}:${index}`)
+          : `${e.projectId}:${index}`
+      }
+      projectId={e.projectId}
+    >
+      {e.element}
+    </ProjectMoveEntry>
+  );
   return (
-    <>
+    <ProjectMoveProvider
+      groups={groups}
+      projects={projects}
+      visibleIds={entries.map((e) => e.projectId)}
+      refresh={refresh}
+      onManualOrder={onManualOrder}
+      onMoved={(groupId) => {
+        if (groupId)
+          setCollapsed((old) => {
+            const next = { ...old, [groupId]: false };
+            try {
+              localStorage.setItem(collapseKey, JSON.stringify(next));
+            } catch {}
+            return next;
+          });
+      }}
+    >
       <Button
         variant="ghost"
         className="mb-2 w-full justify-start"
@@ -111,74 +147,75 @@ export function GroupedProjects({
         {t("Новая группа проектов")}
       </Button>
       {groups.map((group) => {
-        const members = entries.filter((e) =>
-          group.projectIds.includes(e.projectId),
+        const members = group.projectIds.flatMap((id) =>
+          entries.filter((e) => e.projectId === id),
         );
         const unread = unreadProjects.some((id) =>
           group.projectIds.includes(id),
         );
         return (
-          <div
-            className="pf-project-group"
-            data-project-group-id={group.id}
-            key={group.id}
-          >
-            <div className="pf-heading">
-              <button
-                className={"pf-label" + (unread ? " pf-unread" : "")}
-                aria-expanded={!collapsed[group.id]}
-                onClick={() =>
-                  setCollapsed((old) => {
-                    const next = { ...old, [group.id]: !old[group.id] };
-                    try {
-                      localStorage.setItem(collapseKey, JSON.stringify(next));
-                    } catch {}
-                    return next;
-                  })
-                }
-              >
-                <Icon
-                  name={collapsed[group.id] ? "ChevronRight" : "ChevronDown"}
-                  className="pf-chevron"
-                />
-                <Icon name="Layers" />
-                <span>{group.name}</span>
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className="pf-icon"
-                    aria-label={`${t("Действия")}: ${group.name}`}
-                  >
-                    <Icon name="MoreHorizontal" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onSelect={() => open(group)}>
-                    <Icon name="Edit" />
-                    {t("Изменить группу")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      setRemoving(group);
-                      setError("");
-                    }}
-                  >
-                    <Icon name="Layers" />
-                    {t("Убрать группу")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          <ProjectGroupDropTarget key={group.id} groupId={group.id}>
+            <div
+              className="pf-project-group"
+              data-project-group-id={group.id}
+              key={group.id}
+            >
+              <div className="pf-heading">
+                <button
+                  className={"pf-label" + (unread ? " pf-unread" : "")}
+                  aria-expanded={!collapsed[group.id]}
+                  onClick={() =>
+                    setCollapsed((old) => {
+                      const next = { ...old, [group.id]: !old[group.id] };
+                      try {
+                        localStorage.setItem(collapseKey, JSON.stringify(next));
+                      } catch {}
+                      return next;
+                    })
+                  }
+                >
+                  <Icon
+                    name={collapsed[group.id] ? "ChevronRight" : "ChevronDown"}
+                    className="pf-chevron"
+                  />
+                  <Icon name="Layers" />
+                  <span>{group.name}</span>
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="pf-icon"
+                      aria-label={`${t("Действия")}: ${group.name}`}
+                    >
+                      <Icon name="MoreHorizontal" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => open(group)}>
+                      <Icon name="Edit" />
+                      {t("Изменить группу")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setRemoving(group);
+                        setError("");
+                      }}
+                    >
+                      <Icon name="Layers" />
+                      {t("Убрать группу")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              {!collapsed[group.id] && (
+                <div className="pf-children">{members.map(renderEntry)}</div>
+              )}
             </div>
-            {!collapsed[group.id] && (
-              <div className="pf-children">{members.map((e) => e.element)}</div>
-            )}
-          </div>
+          </ProjectGroupDropTarget>
         );
       })}
-      {entries
-        .filter((e) => !memberships.has(e.projectId))
-        .map((e) => e.element)}
+      {entries.filter((e) => !memberships.has(e.projectId)).map(renderEntry)}
+      <ProjectTopLevelDropTarget />
       <Dialog
         open={editing !== null}
         onOpenChange={(value) => {
@@ -302,6 +339,6 @@ export function GroupedProjects({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </ProjectMoveProvider>
   );
 }

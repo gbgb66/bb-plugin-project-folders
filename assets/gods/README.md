@@ -1,5 +1,5 @@
-# God portrait avatars
+# Graphic god avatars
 
-Six original portraits generated with the built-in `image_gen` tool for this fork: Zeus, Neptune, Hermes, Athena, Hephaestus and Prometheus. Source PNGs are 128×128; the interface crops them to a 24px circle. The portraits are painterly illustrations with large faces, classical clothing, recognizable mythological attributes, distinct muted backgrounds, and no text or watermark.
+Active avatars are compact vector emblems drawn for a 24px sidebar: Zeus’s lightning, Neptune’s trident, Hermes’s winged helmet, Athena’s owl, Hephaestus’s hammer and Prometheus’s flame. Each uses one large high-contrast symbol on a distinct solid background, without text or tiny portrait details. SVGs stay crisp at any display scale.
 
-`avatars.json` embeds the PNGs as data URLs so the sidebar works on local and remote devices without an external image service. After changing a PNG, run `node scripts/embed-god-avatars.mjs` before building. Choices are saved as `avatar:<id>` in item styles, not as arbitrary image URLs.
+The six `*.svg` files are embedded as data URLs in `avatars.json`. Run `node scripts/embed-god-avatars.mjs` after changing a symbol, then build. Stored choices remain `avatar:<id>`, so existing projects pick up new symbols automatically. Earlier generated PNG portraits remain as source references; the app uses the SVG emblems.

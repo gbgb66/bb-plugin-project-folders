@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.42 — Movable gods and graphic symbols
+
+- Drag project headings/icons to reorder within a group, move to another group or return to the top level. Show drop positions and expand the destination group after moving.
+- Add keyboard/touch alternatives in project menus: Move to group, Move up and Move down. Group member order persists in project-group metadata; top-level ordering uses the existing order table.
+- Replace small detailed portraits with bold vector emblems: lightning, trident, winged helmet, owl, hammer and flame. Existing avatar choices keep their IDs and immediately use the new graphics.
+- Keep project records, workspaces, chats and other appearance preferences intact. Failed moves leave the original membership/order unchanged.
+
 ## 0.6.41 — God portrait avatars
 
 - Add six round portraits for Zeus, Neptune, Hermes, Athena, Hephaestus and Prometheus to the appearance picker, project rows and management tree.

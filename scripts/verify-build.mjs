@@ -79,12 +79,12 @@ try {
   );
   assert.equal(Object.keys(images).length, 6);
   for (const [id, src] of Object.entries(images)) {
-    const png = readFileSync(
-      new URL(`../assets/gods/${id}.png`, import.meta.url),
+    const svg = readFileSync(
+      new URL(`../assets/gods/${id}.svg`, import.meta.url),
     );
-    assert.equal(png.readUInt32BE(16), 128);
-    assert.equal(png.readUInt32BE(20), 128);
-    assert.equal(src, "data:image/png;base64," + png.toString("base64"));
+    assert.ok(svg.toString().includes('viewBox="0 0 32 32"'));
+    assert.ok(!/<(?:image|script)\b/i.test(svg.toString()));
+    assert.equal(src, "data:image/svg+xml;base64," + svg.toString("base64"));
     assert.ok(appJs.includes(src), `Missing bundled avatar ${id}`);
   }
   console.log(

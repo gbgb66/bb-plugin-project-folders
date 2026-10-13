@@ -2238,8 +2238,41 @@ export default async function plugin(bb: BbPluginApi) {
     },
     project_group_place: async (input) => {
       const parsed = projectGroupPlaceSchema.parse(input);
-      await validateGroupProjects([parsed.projectId]);
-      projectGroups.place(parsed);
+      await validateGroupProjects([
+        parsed.projectId,
+        ...(parsed.beforeProjectId ? [parsed.beforeProjectId] : []),
+      ]);
+      // Top-level reordering shares the existing order table; project records stay intact.
+      if (parsed.groupId === null && parsed.beforeProjectId !== undefined) {
+        if (
+          parsed.beforeProjectId &&
+          projectGroups
+            .list()
+            .some((g) => g.projectIds.includes(parsed.beforeProjectId!))
+        )
+          throw new Error("The destination project is not at the top level.");
+        const rootsOrder = [
+          ...new Set((await roots()).map((r) => r.projectId)),
+        ];
+        const projects = await bb.sdk.projects.list();
+        const order = [
+          ...rootsOrder,
+          ...projects
+            .filter((p) => p.kind !== "personal" && !rootsOrder.includes(p.id))
+            .map((p) => p.id),
+        ].filter((id) => id !== parsed.projectId);
+        const at = parsed.beforeProjectId
+          ? order.indexOf(parsed.beforeProjectId)
+          : order.length;
+        order.splice(at, 0, parsed.projectId);
+        db.transaction(() => {
+          db.prepare("DELETE FROM project_order").run();
+          order.forEach((id, index) =>
+            db.prepare("INSERT INTO project_order VALUES (?,?)").run(id, index),
+          );
+          projectGroups.place(parsed);
+        })();
+      } else projectGroups.place(parsed);
       return { ok: true as const };
     },
     project_group_remove: (input) => {
@@ -3824,7 +3857,7 @@ export default async function plugin(bb: BbPluginApi) {
     commands: [
       {
         name: "avatars",
-        summary: "List built-in god portrait avatars",
+        summary: "List built-in graphic god avatars",
         usage: "bb project-folders avatars",
       },
       {
@@ -3850,7 +3883,7 @@ export default async function plugin(bb: BbPluginApi) {
         summary:
           "Put an existing project in a group; - returns it to the top level",
         usage:
-          "bb project-folders project-group-place <project-id> <group-id-or-dash>",
+          "bb project-folders project-group-place <project-id> <group-id-or-dash> [before-project-id-or-dash]",
       },
       {
         name: "project-group-remove",
@@ -3997,6 +4030,9 @@ export default async function plugin(bb: BbPluginApi) {
             projectGroupPlaceSchema.parse({
               projectId: args[1],
               groupId: args[2] === "-" ? null : args[2],
+              ...(args[3] === undefined
+                ? {}
+                : { beforeProjectId: args[3] === "-" ? null : args[3] }),
             }),
           );
         } else if (args[0] === "project-group-remove") {

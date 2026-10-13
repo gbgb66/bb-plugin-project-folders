@@ -433,5 +433,10 @@
   "Гермес": "Hermes",
   "Афина": "Athene",
   "Гефест": "Hephaistos",
-  "Прометей": "Prometheus"
+  "Прометей": "Prometheus",
+  "Перетащить проект": "Projekt ziehen",
+  "Вне групп": "Außerhalb der Gruppen",
+  "Выше": "Nach oben",
+  "Ниже": "Nach unten",
+  "Проект перемещён": "Projekt verschoben"
 }

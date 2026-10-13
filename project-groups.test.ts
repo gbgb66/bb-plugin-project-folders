@@ -42,6 +42,42 @@ async function setup() {
 }
 
 describe("project groups metadata", () => {
+  it("reorders siblings and transfers at a requested position without losing members", () => {
+    let data: string | undefined;
+    let n = 0;
+    const store = makeProjectGroups({
+      read: () => data,
+      write: (v) => {
+        data = v;
+      },
+      newId: () => `g${++n}`,
+    });
+    const first = store.save({ name: "Olympus", projectIds: ["p1", "p2"] });
+    const other = store.save({ name: "Other", projectIds: ["p3"] });
+    store.place({ projectId: "p2", groupId: first.id, beforeProjectId: "p1" });
+    expect(store.list()[0].projectIds).toEqual(["p2", "p1"]);
+    store.place({ projectId: "p3", groupId: first.id, beforeProjectId: "p2" });
+    expect(store.list()).toEqual([
+      { ...first, projectIds: ["p3", "p2", "p1"] },
+      { ...other, projectIds: [] },
+    ]);
+    const before = data;
+    expect(() =>
+      store.place({
+        projectId: "p1",
+        groupId: other.id,
+        beforeProjectId: "p2",
+      }),
+    ).toThrow(/destination/);
+    expect(() =>
+      store.place({
+        projectId: "p1",
+        groupId: first.id,
+        beforeProjectId: "p1",
+      }),
+    ).toThrow(/itself/);
+    expect(data).toBe(before);
+  });
   it("moves membership exclusively, supports rename, and dissolves without touching project records", () => {
     let data: string | undefined;
     let n = 0;
@@ -107,6 +143,72 @@ describe("project groups metadata", () => {
 });
 
 describe("project group RPC and CLI", () => {
+  it("persists group/root ordering, refuses invalid drop targets atomically, and preserves avatars/files", async () => {
+    const h = await setup();
+    try {
+      let call = h.harness.behavior.callRpc;
+      const group = (await call("project_group_save", {
+        name: "Olympus",
+        projectIds: ["p1", "p2"],
+      })) as ProjectGroup;
+      await call("project_avatar_set", { projectId: "p1", avatarId: "zeus" });
+      await call("project_group_place", {
+        projectId: "p2",
+        groupId: group.id,
+        beforeProjectId: "p1",
+      });
+      expect(
+        ((await call("project_groups_list", null)) as ProjectGroup[])[0]
+          .projectIds,
+      ).toEqual(["p2", "p1"]);
+      const backup = parseBackup(await call("backup_export", null));
+      await expect(
+        call("project_group_place", {
+          projectId: "p3",
+          groupId: null,
+          beforeProjectId: "p1",
+        }),
+      ).rejects.toThrow(/top level/);
+      await expect(
+        call("project_group_place", {
+          projectId: "p3",
+          groupId: null,
+          beforeProjectId: "p3",
+        }),
+      ).rejects.toThrow(/itself/);
+      expect(parseBackup(await call("backup_export", null)).tables).toEqual(
+        backup.tables,
+      );
+      const moved = await h.harness.behavior.runCli([
+        "project-group-place",
+        "p2",
+        "-",
+        "p3",
+      ]);
+      expect(moved.exitCode).toBe(0);
+      Object.assign(h, await h.harness.lifecycle.reload(plugin));
+      call = h.harness.behavior.callRpc;
+      expect(
+        ((await call("project_groups_list", null)) as ProjectGroup[])[0]
+          .projectIds,
+      ).toEqual(["p1"]);
+      const order = h.bb.storage
+        .database()
+        .prepare("SELECT projectId FROM project_order ORDER BY sort")
+        .all() as { projectId: string }[];
+      expect(order.findIndex((r) => r.projectId === "p2")).toBeLessThan(
+        order.findIndex((r) => r.projectId === "p3"),
+      );
+      const prefs = (await call("prefs_get", null)) as {
+        items: Record<string, { icon: string }>;
+      };
+      expect(prefs.items["p:p1"].icon).toBe("avatar:zeus");
+      expect(h.writes).not.toHaveBeenCalled();
+      expect(h.update).not.toHaveBeenCalled();
+    } finally {
+      await h.harness.lifecycle.dispose();
+    }
+  });
   it("persists across reload and backup restore while leaving projects, files and section state intact", async () => {
     const h = await setup();
     try {

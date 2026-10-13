@@ -94,6 +94,54 @@
   border-radius: 50%;
   border: 1px solid var(--border);
 }
+.pf-project-drag-handle {
+  display: inline-flex;
+  flex: none;
+  cursor: grab;
+}
+.pf-project-drag-handle:active {
+  cursor: grabbing;
+}
+.pf-project-move-entry {
+  position: relative;
+}
+.pf-project-drop-above::before,
+.pf-project-drop-below::after {
+  content: "";
+  position: absolute;
+  height: 3px;
+  inset-inline: 4px;
+  background: var(--ring, var(--foreground));
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 1;
+}
+.pf-project-drop-above::before {
+  top: 0;
+}
+.pf-project-drop-below::after {
+  bottom: 0;
+}
+.pf-project-drop-into > .pf-project-group > .pf-heading,
+.pf-project-root-drop.pf-project-drop-into {
+  background: var(--state-hover, var(--muted));
+  outline: 2px solid var(--ring, var(--foreground));
+  border-radius: 6px;
+}
+.pf-project-root-drop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 8px;
+  padding: 12px 8px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--muted-foreground);
+}
+.pf-project-move-feedback {
+  margin: 4px 8px 8px;
+  font-size: 12px;
+}
 .pf-project-group > .pf-children {
   padding-bottom: 8px;
   border-inline-start: 1px solid var(--border);
