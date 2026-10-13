@@ -2,7 +2,7 @@
 title: Data model
 type: data-model
 created: 2026-09-27
-updated: 2026-10-10
+updated: 2026-10-13
 status: active
 confidence: medium
 tags: [data-model, sqlite, persistence]
@@ -24,6 +24,9 @@ sources:
   - section-remove.ts
 ---
 # Data model
+
+The fork also stores top-level **project groups** in the existing `preferences` row `project_groups`: `{version:1,groups:[{id,name,projectIds}]}`. These are visual containers for independent BB projects, distinct from section groups in `folders`. Group ids and membership persist through reload and full backup/restore. Project identities, workspace sources, rules and chats remain owned by BB. No additional migration or physical folder is needed.
+
 
 TL;DR: The plugin stores a normalized section tree plus JSON settings and operation journals in BB’s SQLite plugin database; BB remains the owner of projects, threads, environments and canonical chat history (`server.ts:711-752`, `server.ts:1914-1929`).
 
@@ -225,11 +228,11 @@ Writers: `reorder` handler; readers: project tree loader (`server.ts:3216-3262`,
 
 ### `preferences`
 
-Purpose: Shared UI preferences, migrated global agent settings and cache keepalive configuration.
+Purpose: Shared UI preferences, migrated global agent settings, project groups and cache keepalive configuration.
 
 | Field | Meaning | Key / allowed values |
 |---|---|---|
-| `key` | Record family | `ui` for current UI preferences; `agents` for migrated shared agent settings; `cache_keepalive` for Claude prompt-cache keepalive settings |
+| `key` | Record family | `ui` for current UI preferences; `agents` for migrated shared agent settings; `cache_keepalive` for Claude prompt-cache keepalive settings; `project_groups` for top-level visual project groups |
 | `data` | JSON preference payload | Parsed/validated by the relevant schema |
 
 Writers: preference save, legacy migration and cache keepalive settings save; readers: preferences, rule configuration and keepalive configuration loaders (`server.ts:753-767`, `server.ts:3529-3537`, `server.ts:3460-3477`). UI fields and defaults are defined in `preferences.ts:66-115` and `cache-keepalive.ts:3-14`.

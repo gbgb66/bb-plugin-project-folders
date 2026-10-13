@@ -419,5 +419,12 @@
   "только в сессии BB": "Uniquement en session BB",
   "В режиме «Свой файл» плагин не пишет в файлы, поэтому свои правила действуют только в сессиях, запущенных из BB.": "En mode « Fichier propre », le plugin n’écrit pas dans les fichiers, de sorte que les règles personnalisées ne s’appliquent que dans les sessions lancées depuis BB.",
   "Например: отвечай по-русски, коммиты — по Conventional Commits": "Par exemple : réponds en français, commits selon Conventional Commits",
-  "Например: запусти скилл и пришли текущие задачи": "Par exemple : lance la compétence et envoie les tâches actuelles"
+  "Например: запусти скилл и пришли текущие задачи": "Par exemple : lance la compétence et envoie les tâches actuelles",
+  "Новая группа проектов": "Nouveau groupe de projets",
+  "Изменить группу": "Modifier le groupe",
+  "Убрать группу": "Dissoudre le groupe",
+  "Проекты в группе": "Projets du groupe",
+  "В группе:": "Dans le groupe :",
+  "Объединяет существующие проекты в дереве. Чаты и рабочие папки остаются на своих местах.": "Regroupe les projets existants dans l’arborescence. Les chats et les dossiers de travail restent à leur emplacement actuel.",
+  "Проекты вернутся на верхний уровень. Чаты и файлы сохранятся.": "Les projets reviennent au niveau supérieur. Les chats et les fichiers sont conservés."
 }

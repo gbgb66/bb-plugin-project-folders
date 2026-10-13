@@ -1,6 +1,6 @@
 {
   "name": "bb-plugin-project-folders",
-  "version": "0.6.39",
+  "version": "0.6.40",
   "type": "module",
   "engines": {
     "bb": ">=0.45.0",
@@ -8,7 +8,7 @@
   },
   "bb": {
     "name": "Projects & Sections",
-    "description": "Organize BB chats into folder-backed sections, with a yellow working spinner and green ready or red error dots.",
+    "description": "Group existing BB projects, organize folder-backed sections, and show yellow working, green ready and red error indicators.",
     "branding": {
       "icon": "Folder"
     },

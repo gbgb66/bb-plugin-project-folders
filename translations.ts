@@ -1,5 +1,14 @@
 // English fallback and Russian translation catalog. User content is never translated.
 export const english = {
+  "Новая группа проектов": "New project group",
+  "Изменить группу": "Edit group",
+  "Убрать группу": "Dissolve group",
+  "Проекты в группе": "Projects in group",
+  "В группе:": "In group:",
+  "Объединяет существующие проекты в дереве. Чаты и рабочие папки остаются на своих местах.":
+    "Groups existing projects in the tree. Chats and working folders stay in their current locations.",
+  "Проекты вернутся на верхний уровень. Чаты и файлы сохранятся.":
+    "Projects return to the top level. Chats and files are kept.",
   Работает: "Working",
   "Ответ готов": "Answer ready",
   Ошибка: "Error",

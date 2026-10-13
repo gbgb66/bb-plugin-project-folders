@@ -2,7 +2,7 @@
 title: Project and section tree
 type: component
 created: 2026-09-27
-updated: 2026-10-09
+updated: 2026-10-13
 status: active
 confidence: medium
 tags: [sections, projects, groups, feature]
@@ -19,6 +19,13 @@ sources:
   - preferences.ts
 ---
 # Project and section tree
+
+## Groups above existing projects (fork)
+
+`project-groups.ts` stores visual groups in `preferences`, key `project_groups`, as `{version:1,groups:[{id,name,projectIds}]}`. A project belongs to at most one group. `project_group_save` creates/renames a group and replaces its members; selected projects transfer from any other group. `project_group_place` assigns a single project or returns it to the top level (`groupId:null`). The server validates member IDs against existing standard BB projects. `project_group_remove` dissolves only the metadata group. None of these operations changes BB projects, threads, environments, sources or files; no schema migration is needed.
+
+`GroupedProjects` wraps the existing project rows in both the thread sidebar and management tree. **New project group** and **Edit group** select existing projects; group removal requires UI confirmation. Collapse is remembered in browser preferences. The sidebar marks a group bold when a member project has unread chats. Project rows, their section trees, chat status indicators and actions retain their existing behavior and order. Hidden project rows remain hidden. Metadata changes publish `changed`, and backups include the groups through the existing `preferences` table.
+
 
 TL;DR: The plugin records a project’s section hierarchy in BB storage while each folder section points to a real directory on one connected host; groups add hierarchy using synthetic paths (`server.ts:686-718`, `server.ts:2152-2178`).
 

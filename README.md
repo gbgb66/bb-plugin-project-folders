@@ -4,6 +4,15 @@ Projects & Sections is a BB plugin that organizes project chats into sections ba
 
 This fork adds a status indicator beside every chat: a **spinning yellow ring** while working or waiting, **green** when an answer is ready, and **red** on an execution or queued-send error. A chat with no result yet stays neutral. Hover the indicator for the status; opening or reading a finished chat keeps it green.
 
+Create a **project group** such as “Олимп” above existing BB projects. Click **New project group** in the sidebar or management tree, enter its name and select the projects. The group’s menu lets you rename it or change its members. **Dissolve group** returns its projects to the top level after confirmation. Project IDs, chats, files, working paths and rules stay intact; each project belongs to at most one group. Groups can be collapsed and are included in plugin backups.
+
+```sh
+bb project-folders project-groups --json
+bb project-folders project-group-create "Олимп" <neptune-project-id> <zeus-project-id> --json
+bb project-folders project-group-place <project-id> <group-id> --json
+bb project-folders project-group-place <project-id> - --json
+```
+
 ## Install
 
 ```sh

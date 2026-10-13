@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.40 — Groups of existing projects
+
+- Create a visual parent such as «Олимп» above independent BB projects, with member selection and rename in both the sidebar and management tree.
+- Persist groups in plugin preferences and full backups; preserve project IDs, chats, working paths, rules and files. Each project belongs to at most one group.
+- Remember group collapse, show unread activity, and confirm dissolving a group before returning its projects to the top level.
+- Add typed project-group RPCs and CLI commands for listing, creating, assigning and dissolving groups.
+
 ## 0.6.39 — Yellow working spinner
 
 - Replace the orange working/waiting dot with a yellow rotating ring. Ready answers and errors remain green and red dots.

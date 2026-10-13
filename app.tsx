@@ -1,6 +1,8 @@
 import { FolderBrowser } from "./folder-browser";
 import { ThreadSectionLabel } from "./thread-section-label";
 import { ThreadStatusIndicator } from "./thread-status-indicator";
+import { GroupedProjects } from "./project-groups-ui";
+import type { ProjectGroup } from "./project-groups";
 import {
   MoveDialog,
   PendingMoves,
@@ -348,6 +350,7 @@ function useTree() {
   const [data, setData] = useState<{
     folders: Folder[];
     roots: Folder[];
+    projectGroups: ProjectGroup[];
     bindings: Record<string, string>;
     /** Chats filed by hand: thread id to section id, empty for the project root. */
     places: Record<string, string>;
@@ -356,6 +359,7 @@ function useTree() {
   }>({
     folders: [],
     roots: [],
+    projectGroups: [],
     bindings: {},
     places: {},
     errors: [],
@@ -366,7 +370,11 @@ function useTree() {
     rpc.call("list").then(
       (d) => {
         // A server that predates hand-filed places simply has none.
-        setData({ ...d, places: d.places ?? {} });
+        setData({
+          ...d,
+          places: d.places ?? {},
+          projectGroups: d.projectGroups ?? [],
+        });
         setError("");
       },
       (e) => setError(String(e)),
@@ -2149,10 +2157,7 @@ function FolderHeading({
           )}
           {!root &&
             (group ? (
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={onDeleteGroup}
-              >
+              <DropdownMenuItem variant="destructive" onSelect={onDeleteGroup}>
                 <Icon name="Trash2" />
                 {t("Удалить группу")}
               </DropdownMenuItem>
@@ -2672,49 +2677,84 @@ function Tree(props: PluginThreadListProps) {
         </p>
       )}
       {status === "loading" && <p>{t("Загрузка…")}</p>}
-      {visibleRoots.map((f) => node(f, true))}
-      {projects
-        .filter((p) => !data.roots.some((r) => r.projectId === p.id))
-        .map((p) => {
-          const projectClosed = isProjectClosed(p.id);
-          const projectUnread = threads.some(
-            (t) => t.projectId === p.id && !t.isArchived && !!t.isUnread,
-          );
-          return (
-            <div className="pf-project" key={p.id}>
-              <div className="pf-heading">
-                <button
-                  className={"pf-label" + (projectUnread ? " pf-unread" : "")}
-                  onClick={() => toggle(p.id, projectClosed)}
-                >
-                  <Icon name={projectClosed ? "ChevronRight" : "ChevronDown"} />
-                  <span>{p.isPersonal ? t("Без проекта") : p.name}</span>
-                </button>
-                <button
-                  className="pf-icon"
-                  aria-label={t("Новый чат без проекта")}
-                  onClick={() => {
-                    actions.openNewThread({
-                      projectId: p.id,
-                      focusPrompt: true,
-                    });
-                    props.onNavigate();
-                  }}
-                >
-                  <Icon name="MessageCirclePlus" />
-                </button>
-              </div>
-              {!projectClosed && (
-                <div className="pf-children">
-                  {rows(
-                    threads.filter((t) => t.projectId === p.id),
-                    p.id,
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <GroupedProjects
+        groups={data.projectGroups}
+        projects={[
+          ...data.roots
+            .filter(
+              (r, i) =>
+                data.roots.findIndex((x) => x.projectId === r.projectId) === i,
+            )
+            .map((r) => ({ id: r.projectId, name: r.name })),
+          ...projects.filter(
+            (p) =>
+              !p.isPersonal && !data.roots.some((r) => r.projectId === p.id),
+          ),
+        ]}
+        refresh={refresh}
+        unreadProjects={
+          listSettings.boldUnread
+            ? threads
+                .filter((t) => t.isUnread && !t.isArchived)
+                .map((t) => t.projectId)
+            : []
+        }
+        entries={[
+          ...visibleRoots.map((f) => ({
+            projectId: f.projectId,
+            element: node(f, true),
+          })),
+          ...projects
+            .filter((p) => !data.roots.some((r) => r.projectId === p.id))
+            .map((p) => {
+              const projectClosed = isProjectClosed(p.id);
+              const projectUnread = threads.some(
+                (t) => t.projectId === p.id && !t.isArchived && !!t.isUnread,
+              );
+              return {
+                projectId: p.id,
+                element: (
+                  <div className="pf-project" key={p.id}>
+                    <div className="pf-heading">
+                      <button
+                        className={
+                          "pf-label" + (projectUnread ? " pf-unread" : "")
+                        }
+                        onClick={() => toggle(p.id, projectClosed)}
+                      >
+                        <Icon
+                          name={projectClosed ? "ChevronRight" : "ChevronDown"}
+                        />
+                        <span>{p.isPersonal ? t("Без проекта") : p.name}</span>
+                      </button>
+                      <button
+                        className="pf-icon"
+                        aria-label={t("Новый чат без проекта")}
+                        onClick={() => {
+                          actions.openNewThread({
+                            projectId: p.id,
+                            focusPrompt: true,
+                          });
+                          props.onNavigate();
+                        }}
+                      >
+                        <Icon name="MessageCirclePlus" />
+                      </button>
+                    </div>
+                    {!projectClosed && (
+                      <div className="pf-children">
+                        {rows(
+                          threads.filter((t) => t.projectId === p.id),
+                          p.id,
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ),
+              };
+            }),
+        ]}
+      />
       <button
         className="pf-manage"
         onClick={() => nav.toPluginPanel("folders")}
@@ -3873,9 +3913,7 @@ function Panel({ subPath }: PluginNavPanelProps) {
     (cardClaudeDraft !== null && cardClaudeDraft !== cardClaude);
   const fileEditors = (
     <div
-      className={
-        "pf-file-editors" + (fileIsExpanded ? " pf-expanded" : "")
-      }
+      className={"pf-file-editors" + (fileIsExpanded ? " pf-expanded" : "")}
       key={cardHost}
     >
       <div className="pf-file-head">
@@ -4082,7 +4120,9 @@ function Panel({ subPath }: PluginNavPanelProps) {
                   nav.toPluginPanel("folders", {
                     // Follow the open device tab: the copy you are looking at.
                     subPath: `chat/${sel.projectId}/${
-                      selRoot ? `root:${cardCopy?.hostId ?? sel.hostId}` : sel.id
+                      selRoot
+                        ? `root:${cardCopy?.hostId ?? sel.hostId}`
+                        : sel.id
                     }`,
                   })
                 }
@@ -4174,7 +4214,8 @@ function Panel({ subPath }: PluginNavPanelProps) {
                     {t("Переименовать")}
                   </DropdownMenuItem>
                   {!selRoot &&
-                    reparentTargets(data.folders, sel, data.roots).length > 0 && (
+                    reparentTargets(data.folders, sel, data.roots).length >
+                      0 && (
                       <DropdownMenuItem onSelect={() => setRegrouping(sel)}>
                         <Icon name="MoveTo" />
                         {t("Переместить в группу…")}
@@ -4204,7 +4245,10 @@ function Panel({ subPath }: PluginNavPanelProps) {
                       onSelect={() =>
                         setModal({
                           action: "forget",
-                          target: { projectId: sel.projectId, folderId: sel.id },
+                          target: {
+                            projectId: sel.projectId,
+                            folderId: sel.id,
+                          },
                           folder: sel,
                           level: selLevel,
                         })
@@ -4507,7 +4551,8 @@ function Panel({ subPath }: PluginNavPanelProps) {
                         variant="ghost"
                         disabled={ruleSaving}
                         onClick={() => {
-                          if (ruleDraftSaved) setRuleDraft({ ...ruleDraftSaved });
+                          if (ruleDraftSaved)
+                            setRuleDraft({ ...ruleDraftSaved });
                           setRuleSaved(false);
                         }}
                       >
@@ -4707,7 +4752,21 @@ function Panel({ subPath }: PluginNavPanelProps) {
               {error}
             </p>
           )}
-          {visibleRoots.map((r) => sideNode(r, true))}
+          <GroupedProjects
+            groups={data.projectGroups}
+            projects={data.roots
+              .filter(
+                (r, i) =>
+                  data.roots.findIndex((x) => x.projectId === r.projectId) ===
+                  i,
+              )
+              .map((r) => ({ id: r.projectId, name: r.name }))}
+            refresh={refresh}
+            entries={visibleRoots.map((r) => ({
+              projectId: r.projectId,
+              element: sideNode(r, true),
+            }))}
+          />
           {reorderError && (
             <p role="alert" className="text-destructive pf-side-error">
               {reorderError}

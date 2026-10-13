@@ -27,6 +27,14 @@ import {
 } from "@get-bb/plugin-sdk";
 import type { NewThreadRequest } from "@get-bb/plugin-sdk/app";
 import { z } from "zod";
+import {
+  makeProjectGroups,
+  PROJECT_GROUPS_KEY,
+  projectGroupSchema,
+  projectGroupSaveSchema,
+  projectGroupPlaceSchema,
+  projectGroupRemoveSchema,
+} from "./project-groups";
 import manifest from "./package.json" with { type: "json" };
 import { makeArchives, archiveSchema } from "./archive";
 import { makeSessionPolicies } from "./session-policy-server";
@@ -160,6 +168,22 @@ export const sectionsContract = defineRpcContract({
   },
 });
 export const rpcContract = defineRpcContract({
+  project_groups_list: {
+    input: z.null(),
+    output: z.array(projectGroupSchema),
+  },
+  project_group_save: {
+    input: projectGroupSaveSchema,
+    output: projectGroupSchema,
+  },
+  project_group_place: {
+    input: projectGroupPlaceSchema,
+    output: z.object({ ok: z.literal(true) }),
+  },
+  project_group_remove: {
+    input: projectGroupRemoveSchema,
+    output: z.object({ ok: z.literal(true) }),
+  },
   thread_move: {
     input: targetSchema.extend({ threadId: z.string().min(1) }),
     output: z.object({
@@ -257,6 +281,7 @@ export const rpcContract = defineRpcContract({
     output: z.object({
       folders: z.array(folderSchema),
       roots: z.array(folderSchema),
+      projectGroups: z.array(projectGroupSchema).optional(),
       bindings: z.record(z.string(), z.string()),
       /** Chats placed by hand: thread id to section id, empty for the project root. */
       places: z.record(z.string(), z.string()),
@@ -753,7 +778,9 @@ export default async function plugin(bb: BbPluginApi) {
     const row = db
       .prepare("SELECT data FROM preferences WHERE key='cache_keepalive'")
       .get() as { data: string } | undefined;
-    return row ? parseCacheKeepaliveConfig(safeJson(row.data)) : defaultCacheKeepaliveConfig;
+    return row
+      ? parseCacheKeepaliveConfig(safeJson(row.data))
+      : defaultCacheKeepaliveConfig;
   };
   let currentKeepaliveConfig = loadCacheKeepaliveConfig();
   const keepaliveStore = createSqliteKeepaliveStore(db);
@@ -765,9 +792,15 @@ export default async function plugin(bb: BbPluginApi) {
     log: bb.log,
   });
   bb.onDispose(() => cacheKeepalive.dispose());
-  bb.events.on("thread.idle", ({ thread }) => cacheKeepalive.onThreadIdle(thread));
-  bb.events.on("thread.archived", ({ thread }) => cacheKeepalive.onThreadRemoved(thread.id));
-  bb.events.on("thread.deleted", ({ thread }) => cacheKeepalive.onThreadRemoved(thread.id));
+  bb.events.on("thread.idle", ({ thread }) =>
+    cacheKeepalive.onThreadIdle(thread),
+  );
+  bb.events.on("thread.archived", ({ thread }) =>
+    cacheKeepalive.onThreadRemoved(thread.id),
+  );
+  bb.events.on("thread.deleted", ({ thread }) =>
+    cacheKeepalive.onThreadRemoved(thread.id),
+  );
   type AgentsSettings = {
     agents_auto_create: boolean;
     agents_project_template: string;
@@ -1314,9 +1347,13 @@ export default async function plugin(bb: BbPluginApi) {
     const sources = (project?.sources ?? []).filter(
       (s) => s.type === "local_path",
     );
-    const home =
-      sources.find((s) => s.isDefault)?.hostId ?? sources[0]?.hostId;
-    return named(offeredMachineIds(home, sources.map((s) => s.hostId)));
+    const home = sources.find((s) => s.isDefault)?.hostId ?? sources[0]?.hostId;
+    return named(
+      offeredMachineIds(
+        home,
+        sources.map((s) => s.hostId),
+      ),
+    );
   };
   /**
    * Agents belong to the CLI Agents plugin: it discovers them on the machine
@@ -1651,6 +1688,29 @@ export default async function plugin(bb: BbPluginApi) {
     return p;
   }
   const changed = () => bb.realtime.publish("changed", {});
+  const projectGroups = makeProjectGroups({
+    read: () =>
+      (
+        db
+          .prepare("SELECT data FROM preferences WHERE key=?")
+          .get(PROJECT_GROUPS_KEY) as { data: string } | undefined
+      )?.data,
+    write: (data) => {
+      db.prepare(
+        "INSERT INTO preferences (key,data) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET data=excluded.data",
+      ).run(PROJECT_GROUPS_KEY, data);
+      changed();
+    },
+    newId: () => randomUUID(),
+  });
+  const validateGroupProjects = async (ids: string[]) => {
+    const projects = await bb.sdk.projects.list();
+    const known = new Set(
+      projects.filter((p) => p.kind !== "personal").map((p) => p.id),
+    );
+    for (const id of ids)
+      if (!known.has(id)) throw new Error(`Project not found: ${id}`);
+  };
   notifyGithubChange = changed;
   const agentsFile = (f: Folder) => path.join(f.path, "AGENTS.md");
   const isMissing = (e: unknown) =>
@@ -1830,7 +1890,9 @@ export default async function plugin(bb: BbPluginApi) {
       placed ??
       (atProject
         ? root
-        : sectionForMatches(foldersAt(env.hostId, env.path ?? "", t.projectId)));
+        : sectionForMatches(
+            foldersAt(env.hostId, env.path ?? "", t.projectId),
+          ));
     if (!f)
       throw new Error("The chat working folder is not registered in the tree.");
     return { t, f };
@@ -2142,6 +2204,22 @@ export default async function plugin(bb: BbPluginApi) {
     place: executionPlace,
   });
   const handlers: PluginRpcHandlers<typeof rpcContract> = {
+    project_groups_list: () => projectGroups.list(),
+    project_group_save: async (input) => {
+      const parsed = projectGroupSaveSchema.parse(input);
+      await validateGroupProjects(parsed.projectIds);
+      return projectGroups.save(parsed);
+    },
+    project_group_place: async (input) => {
+      const parsed = projectGroupPlaceSchema.parse(input);
+      await validateGroupProjects([parsed.projectId]);
+      projectGroups.place(parsed);
+      return { ok: true as const };
+    },
+    project_group_remove: (input) => {
+      projectGroups.remove(input);
+      return { ok: true as const };
+    },
     session_policy_capability: () => ({
       available: sessionPolicies.available,
     }),
@@ -2475,6 +2553,7 @@ export default async function plugin(bb: BbPluginApi) {
       return {
         folders: listedFolders,
         roots: listedRoots,
+        projectGroups: projectGroups.list(),
         bindings,
         places,
         machines: machines.map((h) => ({
@@ -3718,6 +3797,29 @@ export default async function plugin(bb: BbPluginApi) {
     summary: "Project sections and chat history",
     commands: [
       {
+        name: "project-groups",
+        summary: "List visual groups of existing BB projects",
+        usage: "bb project-folders project-groups",
+      },
+      {
+        name: "project-group-create",
+        summary: "Create a visual project group; no files or chats move",
+        usage:
+          "bb project-folders project-group-create <name> [project-id ...]",
+      },
+      {
+        name: "project-group-place",
+        summary:
+          "Put an existing project in a group; - returns it to the top level",
+        usage:
+          "bb project-folders project-group-place <project-id> <group-id-or-dash>",
+      },
+      {
+        name: "project-group-remove",
+        summary: "Dissolve a visual group, keeping all BB projects and chats",
+        usage: "bb project-folders project-group-remove <group-id>",
+      },
+      {
         name: "place-chat",
         summary: "List a chat under a section, leaving its folder alone",
         usage:
@@ -3754,8 +3856,7 @@ export default async function plugin(bb: BbPluginApi) {
         name: "restore",
         summary:
           "Restore a section from the archive, or plugin data from a backup file",
-        usage:
-          "bb project-folders restore <archive-id|file> [--merge]",
+        usage: "bb project-folders restore <archive-id|file> [--merge]",
       },
       {
         name: "backup",
@@ -3833,7 +3934,27 @@ export default async function plugin(bb: BbPluginApi) {
             argv[i - 1] !== "--out",
         );
         let value: unknown;
-        if (args[0] === "place-chat") {
+        if (args[0] === "project-groups") {
+          value = projectGroups.list();
+        } else if (args[0] === "project-group-create") {
+          value = await handlers.project_group_save(
+            projectGroupSaveSchema.parse({
+              name: args[1],
+              projectIds: args.slice(2),
+            }),
+          );
+        } else if (args[0] === "project-group-place") {
+          value = await handlers.project_group_place(
+            projectGroupPlaceSchema.parse({
+              projectId: args[1],
+              groupId: args[2] === "-" ? null : args[2],
+            }),
+          );
+        } else if (args[0] === "project-group-remove") {
+          value = handlers.project_group_remove(
+            projectGroupRemoveSchema.parse({ id: args[1] }),
+          );
+        } else if (args[0] === "place-chat") {
           value = await handlers.thread_place({
             threadId: args[1] ?? "",
             projectId: args[2] ?? "",
@@ -3862,7 +3983,11 @@ export default async function plugin(bb: BbPluginApi) {
               .parse({ folderId: args[1], destination: args[2] }),
           );
         } else if (args[0] === "list")
-          value = { folders: folders(), roots: await roots() };
+          value = {
+            folders: folders(),
+            roots: await roots(),
+            projectGroups: projectGroups.list(),
+          };
         else if (args[0] === "create")
           value = await create(
             createSchema.parse({
