@@ -2,6 +2,77 @@
   color: var(--foreground);
   font-size: 13px;
 }
+.pf-navigation {
+  padding: 4px 8px 8px;
+}
+.pf-navigation-row {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  border-radius: 8px;
+}
+.pf-navigation-row:hover,
+.pf-navigation-active {
+  background: var(--accent);
+}
+.pf-navigation-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  min-height: 34px;
+  padding: 6px 8px;
+  text-align: start;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.pf-navigation-link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.pf-navigation button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.pf-navigation-icon,
+.pf-navigation-link > svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.pf-navigation-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pf-navigation-toggle,
+.pf-navigation-count,
+.pf-navigation-link kbd {
+  color: var(--muted-foreground);
+}
+.pf-navigation-count {
+  margin-inline-start: auto;
+  font-size: 11px;
+}
+.pf-navigation-accessory {
+  max-width: 4rem;
+  max-height: 1.25rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.pf-navigation-options {
+  opacity: 0;
+}
+.pf-navigation-row:hover .pf-navigation-options,
+.pf-navigation-row:focus-within .pf-navigation-options {
+  opacity: 1;
+}
+@media (hover: none) {
+  .pf-navigation-options {
+    opacity: 1;
+  }
+}
 .pf-tree {
   padding: 8px 12px 16px;
 }

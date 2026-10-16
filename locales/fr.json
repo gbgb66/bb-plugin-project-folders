@@ -438,5 +438,10 @@
   "Вне групп": "Hors des groupes",
   "Выше": "Monter",
   "Ниже": "Descendre",
-  "Проект перемещён": "Projet déplacé"
+  "Проект перемещён": "Projet déplacé",
+  "Показать плагины": "Afficher les plugins",
+  "Скрыть плагины": "Masquer les plugins",
+  "Другие плагины": "Autres plugins",
+  "Настроить меню": "Personnaliser le menu",
+  "Сворачиваемые плагины": "Plugins repliables"
 }

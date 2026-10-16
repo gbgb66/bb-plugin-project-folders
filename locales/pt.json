@@ -438,5 +438,10 @@
   "Вне групп": "Fora dos grupos",
   "Выше": "Mover para cima",
   "Ниже": "Mover para baixo",
-  "Проект перемещён": "Projeto movido"
+  "Проект перемещён": "Projeto movido",
+  "Показать плагины": "Mostrar plugins",
+  "Скрыть плагины": "Ocultar plugins",
+  "Другие плагины": "Mais plugins",
+  "Настроить меню": "Personalizar menu",
+  "Сворачиваемые плагины": "Plugins recolhíveis"
 }

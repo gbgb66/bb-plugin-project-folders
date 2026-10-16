@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.44 — Collapsible plugin navigation
+
+- Add Show plugins / Hide plugins above the thread list. Start collapsed and remember the choice per browser, keeping New thread and other visible BB actions available.
+- Preserve saved panel visibility and order, active-page highlighting, host navigation, modifier-click splits, drag-to-split, plugin details and the native customization editor. Hidden destinations remain reachable from the overflow menu.
+
 ## 0.6.43 — Archive beside the thread title
 
 - Show an always-visible archive button after each chat title, before its actions menu, in project roots and sections.

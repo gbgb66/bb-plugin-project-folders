@@ -438,5 +438,10 @@
   "Вне групп": "Außerhalb der Gruppen",
   "Выше": "Nach oben",
   "Ниже": "Nach unten",
-  "Проект перемещён": "Projekt verschoben"
+  "Проект перемещён": "Projekt verschoben",
+  "Показать плагины": "Plugins anzeigen",
+  "Скрыть плагины": "Plugins ausblenden",
+  "Другие плагины": "Weitere Plugins",
+  "Настроить меню": "Menü anpassen",
+  "Сворачиваемые плагины": "Einklappbare Plugins"
 }

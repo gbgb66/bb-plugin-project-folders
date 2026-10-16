@@ -13,6 +13,8 @@ Resolve project IDs with `bb project list --json`, inspect groups with `bb proje
 
 ## Sections and chat status
 
+The `project-folders/compact-navigation` sidebar navigation provider adds Show plugins / Hide plugins above the chat list. It starts collapsed and persists in browser storage (`project-folders:plugins-collapsed`), keeping visible BB actions available. It does not disable plugins or change `sidebar.visiblePluginPanels` or panel order. The overflow menu retains hidden destinations and the host customization editor. Select it with `bb settings ui set sidebar.navigationProvider project-folders/compact-navigation` when another provider is pinned; the built-in Navigation remains the fallback.
+
 Every chat row has a visible **Archive** button after its title, before the ellipsis menu. It uses BB's sidebar archive action and host confirmation behavior, without opening the chat. The button is hidden while renaming inline.
 
 This fork adds a live indicator beside each thread: a spinning yellow ring for work or waiting, green for a ready answer, red for execution or queued-send errors, muted for a thread with no result. Reading a completed thread keeps it green. Hover text distinguishes working, waiting for the user, queued, ready and error states. The indicators use BB's sidebar state, not a separate job store.

@@ -1,5 +1,10 @@
 // English fallback and Russian translation catalog. User content is never translated.
 export const english = {
+  "Показать плагины": "Show plugins",
+  "Скрыть плагины": "Hide plugins",
+  "Другие плагины": "More plugins",
+  "Настроить меню": "Customize menu",
+  "Сворачиваемые плагины": "Collapsible plugins",
   "Перетащить проект": "Drag project",
   "Вне групп": "Outside groups",
   Выше: "Move up",

@@ -1,6 +1,7 @@
 import { FolderBrowser } from "./folder-browser";
 import { ThreadSectionLabel } from "./thread-section-label";
 import { ThreadStatusIndicator } from "./thread-status-indicator";
+import { CompactSidebarNavigation } from "./sidebar-navigation";
 import { GroupedProjects } from "./project-groups-ui";
 import { ProjectDragHandle, ProjectMoveMenu } from "./project-moves-ui";
 import type { ProjectGroup } from "./project-groups";
@@ -4906,6 +4907,12 @@ function SettingsSection() {
   );
 }
 export default definePluginApp((app) => {
+  app.slots.experimental_sidebarNavigation({
+    id: "compact-navigation",
+    title: t("Сворачиваемые плагины"),
+    description: t("Показать плагины"),
+    component: CompactSidebarNavigation,
+  });
   app.slots.experimental_threadHeaderAction({
     id: "section-label",
     title: "Section location",
